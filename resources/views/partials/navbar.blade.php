@@ -1,21 +1,27 @@
 <header class="site-header">
+    <input type="checkbox" id="site-nav-toggle" class="site-nav-checkbox">
     <div class="container navbar-wrap">
-        <a href="{{ route('home') }}" class="brand" aria-label="GroceryGo home">
-            <img src="{{ asset('assets/logo/GroceryGo-main.png') }}" alt="GroceryGo logo" class="brand-logo">
+        <a href="/" class="brand" aria-label="GroceryGo home">
+            <img src="/assets/logo/GroceryGo-main.png" alt="GroceryGo logo" class="brand-logo">
         </a>
 
-        <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-menu-toggle>
+        <label for="site-nav-toggle" class="menu-toggle" aria-label="Toggle navigation">
             <span></span>
             <span></span>
             <span></span>
-        </button>
+        </label>
 
-        <nav class="main-nav" data-main-nav>
-            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
-            <a href="#about">About</a>
-            <a href="#how-it-works">Shop Now</a>
-            <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
-            <a href="#" class="btn btn-signup">Sign Up</a>
+        <nav class="main-nav" aria-label="Primary">
+            <div class="nav-primary">
+                <a href="/">Home</a>
+                <a href="#">Shops</a>
+                <a href="#">Categories</a>
+                <a href="/about">About Us</a>
+            </div>
+            <div class="nav-actions">
+                <a href="#" class="nav-baskets">Baskets</a>
+                <a href="#" class="btn btn-signup nav-login">Login</a>
+            </div>
         </nav>
     </div>
 </header>
