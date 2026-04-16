@@ -16,15 +16,15 @@
             <aside class="contact-info-grid">
                 <article class="card contact-info-card">
                     <h3>📧 Support Email</h3>
-                    <p>support@multitrader.com</p>
+                    <p>support.aim@tbc.edu.np</p>
                 </article>
                 <article class="card contact-info-card">
                     <h3>📞 Phone Number</h3>
-                    <p>020 1234 5678</p>
+                    <p>+977 9840000000</p>
                 </article>
                 <article class="card contact-info-card">
                     <h3>📍 Address</h3>
-                    <p>Platform House</p>
+                    <p>Trade Tower, Kathmandu, Nepal</p>
                 </article>
                 <article class="card contact-info-card">
                     <h3>🕘 Working Hours</h3>

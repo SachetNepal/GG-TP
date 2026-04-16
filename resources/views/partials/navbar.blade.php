@@ -14,13 +14,13 @@
         <nav class="main-nav" aria-label="Primary">
             <div class="nav-primary">
                 <a href="/">Home</a>
-                <a href="#">Shops</a>
-                <a href="#">Categories</a>
+                <a href="/shops">Shops</a>
+                <a href="/categories">Categories</a>
                 <a href="/about">About Us</a>
             </div>
             <div class="nav-actions">
-                <a href="#" class="nav-baskets">Baskets</a>
-                <a href="#" class="btn btn-signup nav-login">Login</a>
+                <a href="/cart" class="nav-baskets">Baskets</a>
+                <a href="/login" class="btn btn-signup nav-login">Login</a>
             </div>
         </nav>
     </div>

@@ -114,6 +114,28 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /*
+         * Oracle (OCI8) connection for GroceryGo + Oracle APEX schema.
+         * Requires package: yajra/laravel-oci8
+         */
+        'oracle' => [
+            'driver' => 'oracle',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '1521'),
+            'database' => env('DB_DATABASE', 'FREEPDB1'),
+            'username' => env('DB_USERNAME', 'system'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'AL32UTF8'),
+            'prefix' => env('DB_PREFIX', ''),
+            'prefix_schema' => env('DB_SCHEMA_PREFIX', ''),
+            'edition' => env('DB_EDITION', 'ora$base'),
+            'server_version' => env('DB_SERVER_VERSION', '19c'),
+            'load_balance' => env('DB_LOAD_BALANCE', 'yes'),
+            'dynamic' => [],
+            'max_name_len' => env('ORA_MAX_NAME_LEN', 30),
+        ],
+
     ],
 
     /*
