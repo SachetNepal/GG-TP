@@ -59,3 +59,8 @@ Route::get('/shops', function () {
 Route::get('/traders', function () {
     return redirect('/shops');
 })->name('traders.index');
+
+// Trader UI: PHP templates live in public/trader-portal/ (e.g. /trader-portal/index.php).
+// Optional short URL → hub page (does not affect other /trader-portal/*.php assets).
+Route::redirect('/trader-portal', '/trader-portal/index.php', 302);
+Route::redirect('/trader-portal/', '/trader-portal/index.php', 302);

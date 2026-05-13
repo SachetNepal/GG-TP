@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44" role="img" aria-label="GroceryGo">
+  <defs>
+    <linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f7a4d"/>
+      <stop offset="100%" style="stop-color:#145a32"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="8" width="28" height="28" rx="8" fill="url(#gg)"/>
+  <path fill="#fff" d="M12 22c2.5-4 6.5-6 10-6s7.5 2 10 6c-2.5 4-6.5 6-10 6s-7.5-2-10-6z"/>
+  <text x="40" y="30" font-family="Poppins, Inter, system-ui, sans-serif" font-size="20" font-weight="700" fill="#145a32">GroceryGo</text>
+</svg>

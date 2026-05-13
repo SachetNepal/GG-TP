@@ -1,0 +1,130 @@
+<?php
+/**
+ * AJAX: create product (multipart or JSON body).
+ */
+declare(strict_types=1);
+
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/auth.php';
+
+header('Content-Type: application/json; charset=UTF-8');
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    json_response(['ok' => false, 'error' => 'POST required'], 405);
+}
+
+$me = auth_user();
+if (!$me || strtolower($me['role']) !== 'trader' || (int) $me['shop_id'] < 1) {
+    json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
+}
+
+$csrf = $_POST['_csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!is_string($csrf) || !hash_equals($_SESSION['_csrf'] ?? '', $csrf)) {
+    json_response(['ok' => false, 'error' => 'CSRF'], 419);
+}
+
+$shopId = (int) $me['shop_id'];
+
+$name = trim((string) ($_POST['product_name'] ?? ''));
+$desc = trim((string) ($_POST['description'] ?? ''));
+$categoryId = (int) ($_POST['category_id'] ?? 0);
+$price = (float) str_replace(',', '.', (string) ($_POST['price'] ?? '0'));
+$stock = (int) ($_POST['stock'] ?? 0);
+$unit = trim((string) ($_POST['unit'] ?? ''));
+$maxOrder = (int) ($_POST['max_per_order'] ?? 1);
+$status = strtolower(trim((string) ($_POST['status'] ?? 'draft')));
+$availability = trim((string) ($_POST['availability'] ?? 'both'));
+$tags = trim((string) ($_POST['tags'] ?? '')); // comma-separated from pills
+$subcat = trim((string) ($_POST['subcategory'] ?? ''));
+
+if ($name === '' || $categoryId < 1 || $price <= 0) {
+    json_response(['ok' => false, 'error' => 'Validation: name, category and price are required.'], 422);
+}
+
+// Embed meta in description so core ERD stays unchanged without ALTER.
+$meta = [];
+if ($unit !== '') {
+    $meta[] = 'UNIT:' . $unit;
+}
+if ($maxOrder > 0) {
+    $meta[] = 'MAX:' . $maxOrder;
+}
+if ($tags !== '') {
+    $meta[] = 'TAGS:' . $tags;
+}
+if ($subcat !== '') {
+    $meta[] = 'SUBCAT:' . $subcat;
+}
+$meta[] = 'STATUS:' . $status;
+$meta[] = 'AVAIL:' . $availability;
+$fullDesc = $desc;
+if ($meta !== []) {
+    $fullDesc .= "\n\n<!--" . implode('|', $meta) . '-->';
+}
+
+$sql = 'INSERT INTO product (product_id, product_name, description, price, product_in_stock, category_id, shop_id)
+        VALUES ((SELECT NVL(MAX(product_id), 0) + 1 FROM product), :pname, :pdesc, :price, :stock, :cid, :sid)';
+
+try {
+    $st = db_execute($sql, [
+        'pname' => $name,
+        'pdesc' => $fullDesc,
+        'price' => $price,
+        'stock' => $stock,
+        'cid' => $categoryId,
+        'sid' => $shopId,
+    ]);
+    if (!$st) {
+        $e = oci_error();
+        throw new RuntimeException($e['message'] ?? 'Insert failed');
+    }
+    oci_free_statement($st);
+
+    $newId = (int) (db_fetch_scalar('SELECT MAX(product_id) FROM product WHERE shop_id = :sid', ['sid' => $shopId]) ?? 0);
+
+    // Images
+    $uploadDir = dirname(__DIR__) . '/assets/uploads/products/' . $shopId;
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0775, true);
+    }
+
+    if (!empty($_FILES['images'])) {
+        $files = $_FILES['images'];
+        $names = [];
+        if (is_array($files['name'])) {
+            foreach ($files['name'] as $i => $fname) {
+                if (($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                    continue;
+                }
+                $tmp = $files['tmp_name'][$i];
+                $mime = 'application/octet-stream';
+                if (class_exists('finfo')) {
+                    $fi = new finfo(FILEINFO_MIME_TYPE);
+                    $mime = $fi->file($tmp) ?: $mime;
+                }
+                if (!in_array($mime, ALLOWED_IMAGE_MIME, true)) {
+                    continue;
+                }
+                $safe = safe_filename($fname);
+                $target = $uploadDir . '/' . $newId . '_' . $safe;
+                if (move_uploaded_file($tmp, $target)) {
+                    $names[] = basename($target);
+                }
+            }
+        }
+        if ($names !== []) {
+            $note = '|IMG:' . implode(',', $names);
+            $upd = 'UPDATE product SET description = description || :note WHERE product_id = :pid AND shop_id = :sid';
+            $st2 = db_execute($upd, ['note' => $note, 'pid' => $newId, 'sid' => $shopId]);
+            if ($st2) {
+                oci_free_statement($st2);
+            }
+        }
+    }
+
+    db_commit();
+    json_response(['ok' => true, 'product_id' => $newId]);
+} catch (Throwable $e) {
+    db_rollback();
+    json_response(['ok' => false, 'error' => $e->getMessage()], 500);
+}

@@ -1,0 +1,628 @@
+/**
+ * Trader tools under public/trader-portal — extends /css/style.css (customer UI).
+ */
+
+/* ----- Layout bridges ----- */
+.layout-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-light);
+}
+
+.layout-auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-white);
+}
+
+.layout-auth-page main {
+  flex: 1;
+}
+
+.trader-page-wrap {
+  flex: 1;
+  padding-top: 28px;
+  padding-bottom: 56px;
+}
+
+.trader-page-wrap .muted,
+.trader-page-wrap .small {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.trader-page-wrap p.muted {
+  margin: 0 0 8px;
+}
+
+.trader-page-wrap .muted.small {
+  font-size: 13px;
+}
+
+/* Trader quick strip below customer navbar */
+.trader-strip {
+  background: linear-gradient(90deg, rgba(31, 122, 77, 0.08), rgba(249, 115, 22, 0.06));
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trader-strip-inner {
+  padding: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.trader-strip-inner a {
+  color: var(--primary-green-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.trader-strip-inner a:hover {
+  color: var(--accent-orange);
+}
+
+.trader-strip-label {
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
+/* Page headings (trader screens) */
+.wf-page-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.wf-page-rule {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0 0 28px;
+  border: none;
+}
+
+.wf-section-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--primary-green-dark);
+}
+
+/* Dashboard KPI */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.kpi-card .kpi-label {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-card .kpi-value {
+  margin: 10px 0 0;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--primary-green-dark);
+}
+
+/* Collection slots */
+.slot-board {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.slot-board-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .slot-board-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.slot-day-title {
+  margin: 0 0 12px;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.slot-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--bg-light);
+}
+
+.slot-card time {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--primary-green-dark);
+}
+
+.slot-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.slot-meta strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.order-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Chart */
+.chart-panel-wf {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.chart-panel-wf .chart-wrap {
+  height: 320px;
+}
+
+/* Quick actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  border: 2px solid var(--primary-green);
+  background: rgba(31, 122, 77, 0.06);
+  color: var(--primary-green-dark);
+  font-family: "Poppins", "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.quick-action-btn:hover {
+  background: rgba(31, 122, 77, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Forms (add / update product) */
+.form-actions-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+  align-items: center;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0 22px;
+}
+
+@media (min-width: 768px) {
+  .form-grid.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-grid.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.wf-form-panel {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.wf-form-panel label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.wf-form-panel label:first-of-type,
+.wf-form-panel .form-grid label:first-of-type {
+  margin-top: 0;
+}
+
+.wf-form-panel .form-grid > div > label:first-child {
+  margin-top: 0;
+}
+
+.wf-form-panel .input,
+.wf-form-panel select.input,
+.wf-form-panel textarea.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border-color);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-white);
+  color: var(--text-primary);
+}
+
+.wf-form-panel textarea.input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.wf-form-panel .input:focus,
+.wf-form-panel select.input:focus,
+.wf-form-panel textarea.input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.wf-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.wf-form-panel form > .form-grid + label {
+  margin-top: 20px;
+}
+
+.wf-input-prefix {
+  display: flex;
+  align-items: stretch;
+}
+
+.wf-input-prefix span {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-right: none;
+  border-radius: var(--radius-input) 0 0 var(--radius-input);
+  background: var(--input-bg);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.wf-input-prefix .input {
+  border-radius: 0 var(--radius-input) var(--radius-input) 0;
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Profile wireframe */
+.profile-hero-title {
+  margin-bottom: 24px;
+}
+
+.profile-account-card {
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.profile-account-inner {
+  display: grid;
+  gap: 28px;
+}
+
+@media (min-width: 768px) {
+  .profile-account-inner {
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.profile-photo-col {
+  text-align: center;
+}
+
+.profile-photo-placeholder {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 16px;
+  border-radius: var(--radius-card);
+  border: 2px dashed var(--border-color);
+  background: linear-gradient(145deg, var(--bg-light), #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.profile-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-wide {
+  width: 100%;
+  justify-content: center;
+}
+
+.details-grid {
+  display: grid;
+  gap: 16px 24px;
+}
+
+@media (min-width: 640px) {
+  .details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.detail-pair .detail-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.detail-pair .detail-value {
+  margin: 6px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.profile-account-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Tables / panels inside trader pages */
+.trader-page-wrap .panel {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.trader-page-wrap .panel-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--primary-green-dark);
+}
+
+.trader-page-wrap .panel-title,
+.trader-page-wrap .welcome-strong {
+  font-family: "Poppins", "Inter", sans-serif;
+}
+
+.trader-page-wrap .data-table th {
+  color: var(--text-secondary);
+}
+
+.trader-page-wrap .pill {
+  background: #e8f6ee;
+  color: var(--primary-green-dark);
+}
+
+.trader-page-wrap .badge {
+  background: rgba(31, 122, 77, 0.12);
+  color: var(--primary-green-dark);
+}
+
+.text-right {
+  text-align: right;
+}
+
+.welcome-panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Alerts / notices (Oracle trader-portal pages) */
+.alert {
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.notice-box {
+  border: 1px dashed rgba(31, 122, 77, 0.35);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(31, 122, 77, 0.06);
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.auth-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  margin-bottom: 8px;
+}
+
+.toast-root {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+}
+
+.toast {
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #111827;
+  color: #fff;
+  font-size: 14px;
+  box-shadow: var(--shadow-soft);
+  margin-top: 8px;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-white);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.pill-btn:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green-dark);
+}
+
+/* Legacy Oracle portal form controls (field layout uses .form-grid + .input) */
+.trader-page-wrap .input,
+.trader-page-wrap select.input,
+.trader-page-wrap textarea.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border-color);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-white);
+  color: var(--text-primary);
+}
+
+.trader-page-wrap textarea.input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.trader-page-wrap label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.trader-page-wrap label:first-of-type {
+  margin-top: 0;
+}
+
+.trader-page-wrap .btn-outline {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 12px 20px;
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+}
+
+.trader-page-wrap .btn-outline:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green-dark);
+}
