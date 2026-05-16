@@ -10,7 +10,7 @@
                 <h1>Local Traders</h1>
                 <p class="traders-hero-subtitle">Since 1950</p>
 
-                <form class="hero-search traders-search" action="/shops" method="get">
+                <form class="hero-search traders-search" action="{{ route('categories') }}" method="get">
                     <input type="text" name="q" placeholder="Search traders or products">
                     <button type="submit" class="btn btn-search">Search</button>
                 </form>
@@ -46,26 +46,19 @@
                 <p class="text-black">Trusted local shops serving the community.</p>
             </div>
 
-            @php
-                $traders = [
-                    ['name' => 'Butcher', 'tagline' => 'Quality meats cut fresh daily.'],
-                    ['name' => 'Greengrocer', 'tagline' => 'Seasonal fruits and vegetables.'],
-                    ['name' => 'Fishmonger', 'tagline' => 'Fresh fish sourced responsibly.'],
-                    ['name' => 'Bakery', 'tagline' => 'Baked every morning.'],
-                    ['name' => 'Delicatessen', 'tagline' => 'Specialty groceries and oils.'],
-                ];
-            @endphp
-
             <div class="traders-cards-grid">
-                @foreach($traders as $trader)
+                @forelse($traders as $shop)
                     <article class="card trader-list-card">
                         <div class="trader-list-image" aria-hidden="true">
-                            <span>Image</span>
+                            <span>Shop</span>
                         </div>
-                        <h3>{{ $trader['name'] }}</h3>
-                        <p>{{ $trader['tagline'] }}</p>
+                        <h3>{{ $shop->shop_name }}</h3>
+                        <p>{{ $shop->location ?? 'Local trader' }}</p>
+                        <a href="{{ route('categories', ['shop_id' => $shop->shop_id]) }}" class="btn btn-outline" style="margin-top:12px;">View products</a>
                     </article>
-                @endforeach
+                @empty
+                    <p class="muted">No shops listed yet.</p>
+                @endforelse
             </div>
         </div>
     </section>

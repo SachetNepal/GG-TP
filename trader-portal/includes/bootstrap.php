@@ -14,12 +14,17 @@ require_once $configPath;
 
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    session_start([
-        'cookie_httponly' => true,
-        'cookie_samesite' => 'Lax',
-        'use_strict_mode' => true,
+    $cookiePath = defined('APP_BASE') && APP_BASE !== '' ? APP_BASE : '/';
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => $cookiePath,
+        'httponly' => true,
+        'samesite' => 'Lax',
     ]);
+    session_start(['use_strict_mode' => true]);
 }
 
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/db.php';
+
+portal_ensure_upload_dirs();

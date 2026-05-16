@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'oracle'),
 
     /*
     |--------------------------------------------------------------------------
@@ -121,9 +121,11 @@ return [
         'oracle' => [
             'driver' => 'oracle',
             'url' => env('DB_URL'),
+            'tns' => env('DB_TNS', ''),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '1521'),
-            'database' => env('DB_DATABASE', 'FREEPDB1'),
+            'database' => env('DB_DATABASE', 'XEPDB1'),
+            'service_name' => env('DB_SERVICE_NAME', ''),
             'username' => env('DB_USERNAME', 'system'),
             'password' => env('DB_PASSWORD', ''),
             'charset' => env('DB_CHARSET', 'AL32UTF8'),

@@ -6,7 +6,7 @@ require_once dirname(__DIR__) . '/includes/auth.php';
 require_once dirname(__DIR__) . '/includes/dashboard-queries.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 $dash = trader_dashboard_data($shopId);
 $chartJson = json_encode($dash['daily'], JSON_THROW_ON_ERROR);
 $upcoming = $dash['upcoming'];
@@ -22,13 +22,13 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <div class="alert alert-<?= h($flash['type']) ?>"><?= h($flash['message']) ?></div>
     <?php endif; ?>
 
-    <?php if ($shopId < 1): ?>
+    <?php if (! trader_has_shop($me)): ?>
         <div class="alert alert-warning">
-            No shop is linked to your trader account. Create a <code>SHOP</code> row for your <code>TRADER_ID</code> in Oracle, then refresh.
+            No shop is linked to your account yet. Complete your <a href="<?= h(portal_url('trader/profile.php')) ?>">shop profile</a> or contact support.
         </div>
     <?php endif; ?>
 
-    <section class="panel welcome-panel">
+    <section class="card panel welcome-panel">
         <div class="welcome-panel-row">
             <div>
                 <p class="muted">Dashboard · Last updated</p>
@@ -42,32 +42,32 @@ require_once dirname(__DIR__) . '/includes/header.php';
     </section>
 
     <section class="stats-grid">
-        <article class="stat-card">
+        <article class="card stat-card">
             <p class="stat-label">This week's revenue</p>
             <p class="stat-value" id="statRevenue">£<?= number_format($dash['revenue'], 2) ?></p>
         </article>
-        <article class="stat-card">
+        <article class="card stat-card">
             <p class="stat-label">Orders this week</p>
             <p class="stat-value" id="statOrders"><?= (int) $dash['orders'] ?></p>
         </article>
-        <article class="stat-card">
+        <article class="card stat-card">
             <p class="stat-label">Active products</p>
             <p class="stat-value" id="statProducts"><?= (int) $dash['products'] ?></p>
         </article>
-        <article class="stat-card">
+        <article class="card stat-card">
             <p class="stat-label">Collection slots</p>
             <p class="stat-value" id="statSlots"><?= (int) $dash['slots'] ?></p>
         </article>
     </section>
 
     <div class="grid-two">
-        <section class="panel chart-panel">
+        <section class="card panel chart-panel">
             <h2 class="panel-title">Daily revenue this week</h2>
             <div class="chart-wrap">
                 <canvas id="chartRevenue" height="260" aria-label="Daily revenue chart"></canvas>
             </div>
         </section>
-        <section class="panel">
+        <section class="card panel">
             <h2 class="panel-title">Upcoming orders</h2>
             <div class="order-cards">
                 <?php if (!$upcoming): ?>
@@ -91,7 +91,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
         </section>
     </div>
 
-    <section class="panel">
+    <section class="card panel">
         <h2 class="panel-title">Top products this week</h2>
         <div class="table-scroll">
             <table class="data-table">

@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Web\AuthWebController;
+use App\Http\Controllers\Web\CartWebController;
+use App\Http\Controllers\Web\CatalogWebController;
+use App\Http\Controllers\Web\CheckoutWebController;
+use App\Http\Controllers\Web\OrderWebController;
+use App\Http\Controllers\Web\ProfileWebController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,53 +20,33 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::get('/cart', function () {
-    return view('cart.index');
-})->name('cart');
-
-// ----------------------------
-// Phase 1: Auth / Catalog / Checkout
-// ----------------------------
+Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthWebController::class, 'login']);
 Route::get('/register-type', function () {
     return view('auth.register-type');
 })->name('register-type');
+Route::get('/register', [AuthWebController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthWebController::class, 'register']);
+Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+Route::get('/categories', [CatalogWebController::class, 'categories'])->name('categories');
+Route::get('/products/{id}', [CatalogWebController::class, 'show'])->name('products.show');
+Route::get('/shops', [CatalogWebController::class, 'shops'])->name('shops.index');
+Route::redirect('/traders', '/shops');
 
-Route::get('/categories', function () {
-    return view('categories.index');
-})->name('categories');
+Route::middleware('auth')->group(function (): void {
+    Route::get('/cart', [CartWebController::class, 'index'])->name('cart');
+    Route::post('/cart/items', [CartWebController::class, 'addItem'])->name('cart.add');
+    Route::get('/checkout/collection-slot', [CheckoutWebController::class, 'showSlotPicker'])->name('checkout.collection-slot');
+    Route::post('/checkout/paypal/create-order', [CheckoutWebController::class, 'createPayPalOrder'])->name('checkout.paypal.create');
+    Route::post('/checkout/paypal/redirect', [CheckoutWebController::class, 'startPayPalRedirect'])->name('checkout.paypal.redirect');
+    Route::get('/checkout/paypal/return', [CheckoutWebController::class, 'paypalReturn'])->name('checkout.paypal.return');
+    Route::get('/checkout/paypal/cancel', [CheckoutWebController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
+    Route::post('/checkout/paypal/capture', [CheckoutWebController::class, 'capturePayPal'])->name('checkout.paypal.capture');
+    Route::post('/checkout', [CheckoutWebController::class, 'checkout'])->name('checkout');
+    Route::get('/profile', [ProfileWebController::class, 'index'])->name('profile.index');
+    Route::get('/orders', [OrderWebController::class, 'index'])->name('orders.index');
+});
 
-Route::get('/products/{id}', function ($id) {
-    return view('products.show', ['productId' => $id]);
-})->name('products.show');
-
-Route::get('/checkout/collection-slot', function () {
-    return view('checkout.collection-slot');
-})->name('checkout.collection-slot');
-
-// ----------------------------
-// Phase 2: Customer Profile / Contact / Traders
-// ----------------------------
-Route::get('/profile', function () {
-    return view('profile.index');
-})->name('profile.index');
-
-Route::get('/shops', function () {
-    return view('traders.index');
-})->name('shops.index');
-
-Route::get('/traders', function () {
-    return redirect('/shops');
-})->name('traders.index');
-
-// Trader UI: PHP templates live in public/trader-portal/ (e.g. /trader-portal/index.php).
-// Optional short URL → hub page (does not affect other /trader-portal/*.php assets).
-Route::redirect('/trader-portal', '/trader-portal/index.php', 302);
-Route::redirect('/trader-portal/', '/trader-portal/index.php', 302);
+Route::redirect('/trader-portal', '/GG-TP/trader-portal/login.php', 302);
+Route::redirect('/trader-portal/', '/GG-TP/trader-portal/login.php', 302);

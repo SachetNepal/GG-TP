@@ -1,0 +1,19 @@
+<?php
+$username = "WKSP_GROCERYGODB";
+$password = "H568QQdvDksEq9DyRgo77w";
+
+/*
+Use your APEX database host/service from the report.
+Try port 1521 first.
+*/
+$connectionString = "phxaextprd-nugpl1:1521/aextpdb_apps.dbtoolsprdphxae.dbtoolsprodprod.oraclevcn.com";
+
+$conn = oci_connect($username, $password, $connectionString);
+
+if (!$conn) {
+    $e = oci_error();
+    die("Database connection failed:<br>" . htmlentities($e['message']));
+}
+
+echo "Oracle connection successful!";
+?>

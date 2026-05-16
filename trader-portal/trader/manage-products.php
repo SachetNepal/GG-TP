@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 
 $search = trim((string) ($_GET['q'] ?? ''));
 
@@ -17,10 +17,10 @@ if ($search !== '') {
 }
 
 $products = [];
-if ($shopId > 0) {
+if (trader_has_shop($me)) {
     try {
         $products = db_fetch_all(
-            "SELECT p.product_id, p.product_name, p.price, p.product_in_stock, p.category_id, c.category_name
+            "SELECT p.product_id, p.product_name, p.price, p.product_in_stock, p.category_id, c.cat_name AS category_name
              FROM product p
              LEFT JOIN category c ON c.category_id = p.category_id
              WHERE $where
@@ -74,11 +74,11 @@ require_once dirname(__DIR__) . '/includes/header.php';
                                 <td><?= h((string) ($p['category_name'] ?? '')) ?></td>
                                 <td style="white-space:nowrap;">
                                     <a class="btn btn-outline" style="padding:8px 12px;font-size:14px;" href="<?= h(portal_url('trader/edit-product.php?id=' . (int) ($p['product_id'] ?? 0))) ?>">Edit</a>
-                                    <form method="post" action="<?= h(portal_url('api/delete-product.php')) ?>" style="display:inline;" onsubmit="return confirm('Delete this product?');">
-                                        <?= portal_csrf_field() ?>
-                                        <input type="hidden" name="product_id" value="<?= (int) ($p['product_id'] ?? 0) ?>">
-                                        <button type="submit" class="btn btn-outline" style="padding:8px 12px;font-size:14px;color:#991b1b;border-color:#fecaca;">Delete</button>
-                                    </form>
+                                    <button type="button"
+                                            class="btn btn-outline btn-delete-product"
+                                            style="padding:8px 12px;font-size:14px;color:#991b1b;border-color:#fecaca;"
+                                            data-product-id="<?= (int) ($p['product_id'] ?? 0) ?>"
+                                            data-delete-url="<?= h(portal_url('api/delete-product.php')) ?>">Delete</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

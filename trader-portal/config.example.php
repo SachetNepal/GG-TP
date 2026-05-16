@@ -6,12 +6,16 @@
 
 declare(strict_types=1);
 
-define('ORACLE_USER', 'your_username');
-define('ORACLE_PASS', 'your_password');
-define('ORACLE_DSN', 'localhost/XEPDB1'); // host/service name for oci_connect
+/** Oracle credentials: edit ../db.php or ../db.local.php at project root. */
 
-/** Public URL path to this portal (no trailing slash), e.g. '/trader-portal' or '' */
-define('PORTAL_BASE', '/trader-portal');
+/** Laravel customer app URL path (no trailing slash), e.g. '/GG-TP' or '' on :8080 vhost */
+define('APP_BASE', '/GG-TP');
+
+/** Trader portal URL path (no trailing slash), e.g. '/GG-TP/trader-portal' */
+define('PORTAL_BASE', '/GG-TP/trader-portal');
+
+/** Set true only on local dev to open diagnose.php */
+define('PORTAL_DIAGNOSE_ENABLED', true);
 
 /** CSRF & session */
 define('SESSION_NAME', 'GG_TRADER_PORTAL');

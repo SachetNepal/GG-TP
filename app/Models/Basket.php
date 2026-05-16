@@ -10,6 +10,8 @@ class Basket extends BaseOracleModel
     protected $table = 'BASKET';
     protected $primaryKey = 'basket_id';
     public $timestamps = false;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'created_date',

@@ -1,0 +1,18 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /GG-TP/
+
+    # Serve Laravel for site root (avoid Apache directory listing)
+    RewriteRule ^$ public/index.php [L]
+
+    # Live Oracle trader portal (project root trader-portal/, not public/trader-portal mock)
+    RewriteRule ^trader-portal(?:/(.*))?$ trader-portal/$1 [L,QSA]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+DirectoryIndex public/index.php

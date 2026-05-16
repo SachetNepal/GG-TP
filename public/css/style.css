@@ -1497,6 +1497,11 @@ small {
   color: var(--primary-green-dark);
 }
 
+.paypal-button-container {
+  margin-top: 16px;
+  min-height: 48px;
+}
+
 .slot-confirm-btn {
   width: 100%;
 }

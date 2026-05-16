@@ -35,4 +35,6 @@ return [
         ],
     ],
 
+    'paypal' => require __DIR__.'/paypal.php',
+
 ];

@@ -1,6 +1,6 @@
 <?php
 /**
- * Session auth: trader role via USER + TRADER join.
+ * Session auth: trader accounts via USERS + TRADER (trader_id = user_id).
  */
 declare(strict_types=1);
 
@@ -9,75 +9,93 @@ function auth_user(): ?array
     if (empty($_SESSION['user_id'])) {
         return null;
     }
+
     return [
-        'user_id' => (int) $_SESSION['user_id'],
-        'trader_id' => (int) ($_SESSION['trader_id'] ?? 0),
-        'shop_id' => (int) ($_SESSION['shop_id'] ?? 0),
+        'user_id' => (string) $_SESSION['user_id'],
+        'trader_id' => (string) ($_SESSION['trader_id'] ?? ''),
+        'shop_id' => (string) ($_SESSION['shop_id'] ?? ''),
         'email' => (string) ($_SESSION['email'] ?? ''),
         'display_name' => (string) ($_SESSION['display_name'] ?? 'Trader'),
-        'role' => (string) ($_SESSION['role'] ?? ''),
+        'role' => (string) ($_SESSION['role'] ?? 'trader'),
     ];
 }
 
 function require_trader(): array
 {
     $u = auth_user();
-    $roleOk = $u && strtolower($u['role']) === 'trader';
-    if (!$u || $u['trader_id'] < 1 || !$roleOk) {
+    if (!$u || $u['trader_id'] === '') {
         flash_set('error', 'Please sign in as a trader.');
         portal_redirect('/login.php');
     }
+
     return $u;
 }
 
 /**
  * Load trader context from DB into session (shop_id, names).
  */
-function auth_refresh_from_db(int $userId): void
+function auth_refresh_from_db(string $userId): void
 {
-    $sql = 'SELECT u.user_id, u.first_name, u.last_name, u.email, u.role,
+    $sql = 'SELECT u.user_id, u.first_name, u.last_name, u.email,
                    t.trader_id, s.shop_id, s.shop_name
-            FROM "USER" u
-            INNER JOIN TRADER t ON t.user_id = u.user_id
-            LEFT JOIN SHOP s ON s.trader_id = t.trader_id
-            WHERE u.user_id = :uid';
+            FROM users u
+            INNER JOIN trader t ON t.trader_id = u.user_id
+            LEFT JOIN shop s ON s.trader_id = u.user_id
+            WHERE u.user_id = :user_id';
     try {
-        $row = db_fetch_one($sql, ['uid' => $userId]);
+        $row = db_fetch_one($sql, ['user_id' => $userId]);
     } catch (Throwable $e) {
         return;
     }
     if (!$row) {
         return;
     }
-    $_SESSION['user_id'] = (int) $row['user_id'];
-    $_SESSION['trader_id'] = (int) $row['trader_id'];
-    $_SESSION['shop_id'] = (int) ($row['shop_id'] ?? 0);
+    $_SESSION['user_id'] = (string) $row['user_id'];
+    $_SESSION['trader_id'] = (string) $row['trader_id'];
+    $_SESSION['shop_id'] = (string) ($row['shop_id'] ?? '');
     $_SESSION['email'] = (string) $row['email'];
-    $_SESSION['role'] = (string) $row['role'];
+    $_SESSION['role'] = 'trader';
     $fn = trim((string) ($row['first_name'] ?? '') . ' ' . (string) ($row['last_name'] ?? ''));
     $_SESSION['display_name'] = $fn !== '' ? $fn : (string) ($row['shop_name'] ?? 'Trader');
 }
 
+function portal_password_verify(string $plain, string $stored): bool
+{
+    if ($stored === '' || $plain === '') {
+        return false;
+    }
+
+    if (str_starts_with($stored, '$2y$')
+        || str_starts_with($stored, '$2a$')
+        || str_starts_with($stored, '$2b$')
+        || str_starts_with($stored, '$argon2')) {
+        return password_verify($plain, $stored);
+    }
+
+    return hash_equals($stored, $plain);
+}
+
 function login_trader(string $email, string $password): bool
 {
-    $sql = 'SELECT user_id, email, password, role, first_name, last_name
-            FROM "USER" WHERE LOWER(email) = LOWER(:email)';
+    $sql = 'SELECT u.user_id, u.email, u.password, u.first_name, u.last_name, t.trader_id
+            FROM users u
+            INNER JOIN trader t ON t.trader_id = u.user_id
+            WHERE LOWER(u.email) = LOWER(:email)';
     try {
         $row = db_fetch_one($sql, ['email' => $email]);
     } catch (Throwable $e) {
         return false;
     }
-    if (!$row || strtolower((string) $row['role']) !== 'trader') {
+    if (!$row || ! portal_password_verify($password, (string) ($row['password'] ?? ''))) {
         return false;
     }
-    $hash = (string) $row['password'];
-    if (!password_verify($password, $hash)) {
-        return false;
-    }
-    $_SESSION['user_id'] = (int) $row['user_id'];
+
+    $_SESSION['user_id'] = (string) $row['user_id'];
     $_SESSION['email'] = (string) $row['email'];
-    $_SESSION['role'] = (string) $row['role'];
-    auth_refresh_from_db((int) $row['user_id']);
+    $_SESSION['role'] = 'trader';
+    $_SESSION['trader_id'] = (string) $row['trader_id'];
+    auth_refresh_from_db((string) $row['user_id']);
+
     return true;
 }
 

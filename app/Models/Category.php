@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends BaseOracleModel
@@ -11,8 +12,15 @@ class Category extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
-        'category_name',
+        'cat_name',
     ];
+
+    protected function categoryName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (string) ($this->attributes['cat_name'] ?? ''),
+        );
+    }
 
     public function products(): HasMany
     {

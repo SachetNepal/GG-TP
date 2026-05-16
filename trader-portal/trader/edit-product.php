@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 $id = (int) ($_GET['id'] ?? 0);
 
 if ($id < 1 || $shopId < 1) {
@@ -24,7 +24,7 @@ if (!$row) {
 }
 
 $categories = db_fetch_all(
-    'SELECT category_id, category_name FROM category ORDER BY category_name'
+    'SELECT category_id, cat_name FROM category ORDER BY cat_name'
 );
 
 $pageTitle = 'Edit product';
@@ -34,7 +34,8 @@ require_once dirname(__DIR__) . '/includes/header.php';
     <form id="productForm"
           action="<?= h(portal_url('api/update-product.php')) ?>"
           method="post"
-          class="panel">
+          class="panel"
+          data-redirect-published="<?= h(portal_url('trader/manage-products.php')) ?>">
 
         <?= portal_csrf_field() ?>
         <input type="hidden" name="product_id" value="<?= (int) $id ?>">
@@ -57,7 +58,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     <?php foreach ($categories as $c): ?>
                         <option value="<?= (int) ($c['category_id'] ?? 0) ?>"
                             <?= ((int) ($row['category_id'] ?? 0) === (int) ($c['category_id'] ?? 0)) ? 'selected' : '' ?>>
-                            <?= h((string) ($c['category_name'] ?? '')) ?>
+                            <?= h((string) ($c['cat_name'] ?? $c['category_name'] ?? '')) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -79,25 +80,4 @@ require_once dirname(__DIR__) . '/includes/header.php';
             <a class="btn btn-outline" href="<?= h(portal_url('trader/manage-products.php')) ?>">Cancel</a>
         </div>
     </form>
-<script>
-document.getElementById('productForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var fd = new FormData(this);
-    var csrf = document.querySelector('meta[name="csrf-token"]').content;
-    fetch(this.action, {
-        method: 'POST',
-        body: fd,
-        credentials: 'same-origin',
-        headers: {'X-CSRF-TOKEN': csrf}
-    }).then(function (r) { return r.json(); }).then(function (j) {
-        if (j.ok) {
-            if (typeof showToast === 'function') showToast('Saved.');
-            window.location.href = <?= json_encode(portal_url('trader/manage-products.php')) ?>;
-        } else {
-            if (typeof showToast === 'function') showToast(j.error || 'Error', 'error');
-            else alert(j.error || 'Error');
-        }
-    }).catch(function () { alert('Network error'); });
-});
-</script>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

@@ -15,11 +15,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
 }
 
 $me = auth_user();
-if (!$me || strtolower($me['role']) !== 'trader' || $me['trader_id'] < 1) {
+if (!$me || ($me['trader_id'] ?? '') === '') {
     json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
 }
 
-$shopId = (int) $me['shop_id'];
-$data = trader_dashboard_data($shopId);
+$data = trader_dashboard_data(trader_shop_id($me));
 $data['ok'] = true;
 json_response($data);

@@ -11,17 +11,15 @@ class CollectionSlot extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
-        'date',
-        'time',
+        'slot_id',
+        'date_',
+        'time_',
         'order_id',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'date' => 'string',
-        ];
-    }
+    protected $casts = [
+        'date_' => 'date',
+    ];
 
     public function order(): BelongsTo
     {

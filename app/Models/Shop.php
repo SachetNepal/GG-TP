@@ -15,6 +15,7 @@ class Shop extends BaseOracleModel
         'shop_name',
         'location',
         'trader_id',
+        'contact_info',
     ];
 
     public function trader(): BelongsTo

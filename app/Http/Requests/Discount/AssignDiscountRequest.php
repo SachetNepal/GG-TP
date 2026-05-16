@@ -14,7 +14,7 @@ class AssignDiscountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer'],
+            'product_id' => ['required', 'string', 'max:20'],
             'rate' => ['required', 'numeric', 'min:0', 'max:100'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],

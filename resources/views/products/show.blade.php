@@ -1,112 +1,76 @@
 @extends('layouts.app')
 
-@section('title', 'GroceryGo - Product Details')
+@section('title', 'GroceryGo - ' . ($product->product_name ?? 'Product'))
 
 @section('content')
-    {{-- Page title --}}
     @include('partials.page-hero', ['title' => 'Product Details'])
 
     <section class="section">
         <div class="container product-details-layout">
-            {{-- Left: product image --}}
             <article class="card product-details-media">
                 <div class="product-image-large" aria-hidden="true">
                     <span>Product Image</span>
                 </div>
             </article>
 
-            {{-- Right: product details --}}
             <article class="product-details-panel">
                 @php
-                    $product = $product ?? [
-                        'id' => 1,
-                        'trader' => 'Greengrocer',
-                        'name' => 'Fresh Tomatoes',
-                        'price' => 120,
-                        'stock' => ['label' => 'In Stock', 'variant' => 'in'],
-                        'description' => 'Fresh, hand-picked tomatoes with natural flavor and great shelf life.',
-                    ];
-                    $reviews = $reviews ?? [
-                        ['name' => 'Customer A', 'rating' => 5, 'text' => 'Very fresh and great taste.'],
-                        ['name' => 'Customer B', 'rating' => 4, 'text' => 'Good quality and quick pickup.'],
-                        ['name' => 'Customer C', 'rating' => 5, 'text' => 'Will buy again.'],
-                    ];
-                    $related = $related ?? [
-                        ['id' => 2, 'trader' => 'Greengrocer', 'category' => 'Vegetables', 'name' => 'Green Peppers', 'price' => 140, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                        ['id' => 3, 'trader' => 'Bakery', 'category' => 'Bakery', 'name' => 'Whole Wheat Bread', 'price' => 180, 'stock' => ['label' => 'Low Stock', 'variant' => 'low']],
-                        ['id' => 4, 'trader' => 'Butcher', 'category' => 'Meat', 'name' => 'Chicken Breast', 'price' => 520, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                        ['id' => 5, 'trader' => 'Delicatessen', 'category' => 'Groceries', 'name' => 'Olive Oil', 'price' => 540, 'stock' => ['label' => 'Out of Stock', 'variant' => 'out']],
-                    ];
+                    $stock = (int) ($product->product_in_stock ?? 0);
+                    $stockLabel = $stock <= 0 ? 'Out of Stock' : ($stock <= 5 ? 'Low Stock' : 'In Stock');
+                    $stockVariant = $stock <= 0 ? 'out' : ($stock <= 5 ? 'low' : 'in');
                 @endphp
 
                 <div class="product-shop">
-                    <span class="product-meta-pill">Trader: {{ $product['trader'] }}</span>
+                    <span class="product-meta-pill">Trader: {{ $product->shop->shop_name ?? 'Shop' }}</span>
                 </div>
 
-                <h2 class="product-details-name">{{ $product['name'] }}</h2>
+                <h2 class="product-details-name">{{ $product->product_name }}</h2>
 
                 <div class="product-details-price-row">
-                    <div class="product-price-large">
-                        Rs {{ number_format((float) $product['price'], 0) }}
-                    </div>
-                    @include('partials.status-badge', [
-                        'label' => $product['stock']['label'] ?? 'In Stock',
-                        'variant' => $product['stock']['variant'] ?? 'in',
-                    ])
+                    <div class="product-price-large">£{{ number_format((float) $product->price, 2) }}</div>
+                    @include('partials.status-badge', ['label' => $stockLabel, 'variant' => $stockVariant])
                 </div>
 
                 <div class="product-details-description">
                     <h3>Description</h3>
-                    <p class="text-secondary">{{ $product['description'] }}</p>
+                    <p class="text-secondary">{{ $product->description }}</p>
                 </div>
 
-                {{-- Quantity selector + Add to Basket --}}
-                <div class="product-qty-add">
-                    <div class="qty-field">
-                        <label for="quantity">Quantity</label>
-                        <input id="quantity" class="qty-input" type="number" value="1" min="1" max="20">
-                    </div>
+                @if (session('status'))
+                    <p class="ok" style="margin-bottom:12px;">{{ session('status') }}</p>
+                @endif
 
-                    <button type="button" class="btn btn-primary product-add-btn">
-                        Add to Basket
-                    </button>
-                </div>
+                @auth
+                    <form method="post" action="{{ route('cart.add') }}" class="product-qty-add">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                        <div class="qty-field">
+                            <label for="quantity">Quantity</label>
+                            <input id="quantity" class="qty-input" type="number" name="quantity" value="1" min="1" max="20">
+                        </div>
+                        <button type="submit" class="btn btn-primary product-add-btn">Add to Basket</button>
+                    </form>
+                @else
+                    <p><a href="{{ route('login') }}">Sign in</a> to add to basket.</p>
+                @endauth
 
-                {{-- Reviews area --}}
+                @if ($product->reviews && $product->reviews->isNotEmpty())
                 <section class="reviews-section">
                     <h3>Reviews</h3>
                     <div class="reviews-grid">
-                        @foreach($reviews as $review)
+                        @foreach ($product->reviews as $review)
                             <article class="card review-card">
                                 <div class="review-head">
-                                    <strong>{{ $review['name'] }}</strong>
-                                    <span class="review-stars" aria-label="{{ $review['rating'] }} star rating">
-                                        @for($i = 0; $i < $review['rating']; $i++)
-                                            ★
-                                        @endfor
-                                    </span>
+                                    <strong>{{ $review->customer->user->first_name ?? 'Customer' }}</strong>
+                                    <span class="review-stars">{{ str_repeat('★', (int) $review->rating) }}</span>
                                 </div>
-                                <p class="text-secondary">{{ $review['text'] }}</p>
+                                <p class="text-secondary">{{ $review->review_text }}</p>
                             </article>
                         @endforeach
                     </div>
                 </section>
+                @endif
             </article>
         </div>
     </section>
-
-    {{-- You May Like --}}
-    <section class="section section-light">
-        <div class="container">
-            <div class="section-heading">
-                <h2>You May Like</h2>
-            </div>
-            <div class="product-grid">
-                @foreach($related as $p)
-                    @include('partials.product-card', ['product' => $p])
-                @endforeach
-            </div>
-        </div>
-    </section>
 @endsection
-

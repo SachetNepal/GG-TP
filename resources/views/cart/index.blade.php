@@ -33,22 +33,15 @@
 
                         <tbody>
                             @php
-                                // Replace these placeholders with your real cart data when wiring backend.
-                                $cartItems = $cartItems ?? [
-                                    ['name' => 'Fresh Tomatoes', 'price' => 120, 'quantity' => 2],
-                                    ['name' => 'Olive Oil', 'price' => 540, 'quantity' => 1],
-                                ];
-                                $totalPrice = $totalPrice ?? array_sum(array_map(function ($i) {
-                                    return ($i['price'] ?? 0) * ($i['quantity'] ?? 0);
-                                }, $cartItems));
+                                $totalPrice = $total ?? 0;
                             @endphp
 
                             @forelse($cartItems as $item)
                                 @php
-                                    $name = $item['name'] ?? 'Item';
-                                    $price = (float) ($item['price'] ?? 0);
+                                    $name = $item['product_name'] ?? 'Item';
+                                    $price = (float) ($item['unit_price'] ?? 0);
                                     $qty = (int) ($item['quantity'] ?? 1);
-                                    $itemTotal = $price * $qty;
+                                    $itemTotal = (float) ($item['line_total'] ?? ($price * $qty));
                                 @endphp
                                 <tr class="cart-row">
                                     <td class="cart-product">
@@ -96,9 +89,9 @@
                     <strong>Rs {{ number_format($totalPrice, 0) }}</strong>
                 </div>
 
-                <button class="btn btn-primary cart-checkout-btn" type="button">
+                <a class="btn btn-primary cart-checkout-btn" href="{{ route('checkout.collection-slot') }}">
                     Checkout
-                </button>
+                </a>
 
                 <p class="cart-note">Maximum of 20 cart items</p>
             </aside>

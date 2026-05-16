@@ -14,7 +14,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $me = auth_user();
-if (!$me || strtolower($me['role']) !== 'trader' || (int) $me['shop_id'] < 1) {
+if (!$me || strtolower($me['role']) !== 'trader' || ! trader_has_shop($me)) {
     json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
 }
 
@@ -23,11 +23,11 @@ if (!is_string($csrf) || !hash_equals($_SESSION['_csrf'] ?? '', $csrf)) {
     json_response(['ok' => false, 'error' => 'CSRF'], 419);
 }
 
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 
 $name = trim((string) ($_POST['product_name'] ?? ''));
 $desc = trim((string) ($_POST['description'] ?? ''));
-$categoryId = (int) ($_POST['category_id'] ?? 0);
+$categoryId = trim((string) ($_POST['category_id'] ?? ''));
 $price = (float) str_replace(',', '.', (string) ($_POST['price'] ?? '0'));
 $stock = (int) ($_POST['stock'] ?? 0);
 $unit = trim((string) ($_POST['unit'] ?? ''));
@@ -37,7 +37,7 @@ $availability = trim((string) ($_POST['availability'] ?? 'both'));
 $tags = trim((string) ($_POST['tags'] ?? '')); // comma-separated from pills
 $subcat = trim((string) ($_POST['subcategory'] ?? ''));
 
-if ($name === '' || $categoryId < 1 || $price <= 0) {
+if ($name === '' || $categoryId === '' || $price <= 0) {
     json_response(['ok' => false, 'error' => 'Validation: name, category and price are required.'], 422);
 }
 
@@ -62,11 +62,14 @@ if ($meta !== []) {
     $fullDesc .= "\n\n<!--" . implode('|', $meta) . '-->';
 }
 
+$newPid = db_next_prefixed_id('product', 'product_id', 'P');
+
 $sql = 'INSERT INTO product (product_id, product_name, description, price, product_in_stock, category_id, shop_id)
-        VALUES ((SELECT NVL(MAX(product_id), 0) + 1 FROM product), :pname, :pdesc, :price, :stock, :cid, :sid)';
+        VALUES (:pid, :pname, :pdesc, :price, :stock, :cid, :sid)';
 
 try {
     $st = db_execute($sql, [
+        'pid' => $newPid,
         'pname' => $name,
         'pdesc' => $fullDesc,
         'price' => $price,
@@ -80,7 +83,7 @@ try {
     }
     oci_free_statement($st);
 
-    $newId = (int) (db_fetch_scalar('SELECT MAX(product_id) FROM product WHERE shop_id = :sid', ['sid' => $shopId]) ?? 0);
+    $newId = $newPid;
 
     // Images
     $uploadDir = dirname(__DIR__) . '/assets/uploads/products/' . $shopId;

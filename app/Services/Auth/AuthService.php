@@ -7,6 +7,7 @@ use App\Models\Shop;
 use App\Models\Trader;
 use App\Models\User;
 use App\Models\Verification;
+use App\Support\OracleId;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,18 +18,19 @@ class AuthService
     public function registerCustomer(array $data): array
     {
         return DB::connection('oracle')->transaction(function () use ($data) {
+            $userId = OracleId::next('USERS', 'user_id', 'U');
             $user = User::create([
+                'user_id' => $userId,
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => strtolower($data['email']),
-                'password' => $data['password'],
+                'password' => Hash::make($data['password']),
                 'phone_num' => $data['phone_num'],
                 'address' => $data['address'],
                 'created_at' => now(),
-                'role' => 'customer',
             ]);
 
-            $customer = Customer::create(['user_id' => $user->user_id]);
+            $customer = Customer::create(['customer_id' => $userId]);
             $verification = $this->createVerification($user->user_id);
 
             return compact('user', 'customer', 'verification');
@@ -38,22 +40,26 @@ class AuthService
     public function registerTrader(array $data): array
     {
         return DB::connection('oracle')->transaction(function () use ($data) {
+            $userId = OracleId::next('USERS', 'user_id', 'U');
             $user = User::create([
+                'user_id' => $userId,
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => strtolower($data['email']),
-                'password' => $data['password'],
+                'password' => Hash::make($data['password']),
                 'phone_num' => $data['phone_num'],
                 'address' => $data['address'],
                 'created_at' => now(),
-                'role' => 'trader',
             ]);
 
-            $trader = Trader::create(['user_id' => $user->user_id]);
+            $trader = Trader::create([
+                'trader_id' => $userId,
+                'admin_id' => $data['admin_id'] ?? $userId,
+            ]);
             $shop = Shop::create([
                 'shop_name' => $data['shop_name'],
                 'location' => $data['location'],
-                'trader_id' => $trader->trader_id,
+                'trader_id' => $userId,
             ]);
             $verification = $this->createVerification($user->user_id);
 
@@ -61,16 +67,58 @@ class AuthService
         });
     }
 
-    public function login(array $credentials): User
+    public function login(array $credentials, bool $remember = false): User
     {
-        $user = User::query()->where('email', strtolower($credentials['email']))->first();
-
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        $user = $this->attemptLogin($credentials, $remember);
+        if (!$user) {
             abort(401, 'Invalid credentials');
         }
 
-        Auth::login($user);
         return $user;
+    }
+
+    public function attemptLogin(array $credentials, bool $remember = false): ?User
+    {
+        $email = strtolower(trim((string) ($credentials['email'] ?? '')));
+        $password = (string) ($credentials['password'] ?? '');
+
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if (!$user || ! $this->passwordMatches($password, (string) $user->getAuthPassword())) {
+            return null;
+        }
+
+        Auth::login($user, $remember);
+
+        return $user;
+    }
+
+    /** Supports bcrypt hashes and legacy plain-text passwords in Oracle. */
+    public function passwordMatches(string $plain, string $stored): bool
+    {
+        if ($stored === '' || $plain === '') {
+            return false;
+        }
+
+        if ($this->storedPasswordIsHashed($stored)) {
+            try {
+                return Hash::check($plain, $stored);
+            } catch (\RuntimeException) {
+                return false;
+            }
+        }
+
+        return hash_equals($stored, $plain);
+    }
+
+    protected function storedPasswordIsHashed(string $stored): bool
+    {
+        return str_starts_with($stored, '$2y$')
+            || str_starts_with($stored, '$2a$')
+            || str_starts_with($stored, '$2b$')
+            || str_starts_with($stored, '$argon2');
     }
 
     public function logout(): void
@@ -94,7 +142,7 @@ class AuthService
         return $verification;
     }
 
-    protected function createVerification(int $userId): Verification
+    protected function createVerification(string|int $userId): Verification
     {
         return Verification::create([
             'verification_token' => Str::uuid()->toString(),

@@ -5,12 +5,12 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 
 $categories = [];
 try {
     $categories = db_fetch_all(
-        'SELECT category_id, category_name FROM category ORDER BY category_name'
+        'SELECT category_id, cat_name FROM category ORDER BY cat_name'
     );
 } catch (Throwable $e) {
     $categories = [];
@@ -52,8 +52,8 @@ require_once dirname(__DIR__) . '/includes/header.php';
                     <select class="input" id="category_id" name="category_id" required>
                         <option value="">Select…</option>
                         <?php foreach ($categories as $c): ?>
-                            <option value="<?= (int) ($c['category_id'] ?? 0) ?>">
-                                <?= h((string) ($c['category_name'] ?? '')) ?>
+                            <option value="<?= h((string) ($c['category_id'] ?? '')) ?>">
+                                <?= h((string) ($c['cat_name'] ?? $c['category_name'] ?? '')) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

@@ -4,22 +4,19 @@
  */
 declare(strict_types=1);
 
+require_once dirname(__DIR__, 2) . '/db.php';
+
 /**
- * @return resource|false Oracle connection
+ * @return resource Oracle connection from project root db.php
  */
 function db_conn()
 {
-    static $conn = null;
-    if ($conn !== null) {
-        return $conn;
-    }
+    global $conn;
     if (!function_exists('oci_connect')) {
         throw new RuntimeException('PHP OCI8 extension is not enabled.');
     }
-    $conn = @oci_connect(ORACLE_USER, ORACLE_PASS, ORACLE_DSN, 'AL32UTF8');
-    if (!$conn) {
-        $e = oci_error();
-        throw new RuntimeException('Oracle connection failed: ' . ($e['message'] ?? 'unknown'));
+    if (empty($conn)) {
+        throw new RuntimeException('Oracle connection is not available.');
     }
     return $conn;
 }
@@ -115,4 +112,51 @@ function db_commit(): bool
 function db_rollback(): bool
 {
     return oci_rollback(db_conn());
+}
+
+/**
+ * Prefer Oracle sequence; fall back to MAX(id)+1 if sequence missing.
+ */
+/**
+ * Next prefixed Oracle id (e.g. U + max => U13, SH + max => SH6).
+ */
+function db_next_prefixed_id(string $table, string $idColumn, string $prefix): string
+{
+    $rows = db_fetch_all(
+        'SELECT ' . $idColumn . ' AS id FROM ' . $table . ' WHERE ' . $idColumn . ' LIKE :pfx',
+        ['pfx' => $prefix . '%']
+    );
+    $max = 0;
+    foreach ($rows as $row) {
+        $val = (string) ($row['id'] ?? '');
+        if (preg_match('/(\d+)$/', $val, $m)) {
+            $max = max($max, (int) $m[1]);
+        }
+    }
+
+    return $prefix . ($max + 1);
+}
+
+function db_next_id(string $sequence, string $table, string $idColumn): int
+{
+    $allowed = [
+        'user_seq' => true,
+        'trader_seq' => true,
+        'shop_seq' => true,
+        'product_seq' => true,
+    ];
+    if (isset($allowed[$sequence])) {
+        try {
+            $next = db_fetch_scalar('SELECT ' . $sequence . '.NEXTVAL AS n FROM DUAL');
+            if ($next !== null) {
+                return (int) $next;
+            }
+        } catch (Throwable) {
+            // sequence not created yet
+        }
+    }
+
+    return (int) db_fetch_scalar(
+        'SELECT NVL(MAX(' . $idColumn . '), 0) + 1 FROM ' . $table
+    );
 }

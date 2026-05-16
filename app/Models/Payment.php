@@ -11,6 +11,7 @@ class Payment extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
+        'payment_id',
         'paid_amount',
         'payment_method',
         'payment_status',

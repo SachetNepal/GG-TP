@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends BaseOracleModel
 {
-    protected $table = 'ORDER';
+    protected $table = 'ORDERS';
     protected $primaryKey = 'order_id';
     public $timestamps = false;
 
     protected $fillable = [
+        'order_id',
         'order_date',
         'status',
         'amount',
-        'user_id',
+        'customer_id',
     ];
 
     protected function casts(): array
@@ -29,7 +30,7 @@ class Order extends BaseOracleModel
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'customer_id', 'user_id');
     }
 
     public function items(): HasMany

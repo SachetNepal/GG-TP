@@ -13,7 +13,7 @@ class OrderController extends Controller
     {
         $orders = Order::query()
             ->with(['items.product', 'payment', 'collectionSlot'])
-            ->where('user_id', $request->user()->user_id)
+            ->where('customer_id', $request->user()->user_id)
             ->orderByDesc('order_id')
             ->paginate(20);
 
@@ -24,7 +24,7 @@ class OrderController extends Controller
     {
         $order = Order::query()
             ->where('order_id', $orderId)
-            ->where('user_id', $request->user()->user_id)
+            ->where('customer_id', $request->user()->user_id)
             ->firstOrFail();
 
         abort_if($order->status === 'completed', 422, 'Completed orders cannot be cancelled');

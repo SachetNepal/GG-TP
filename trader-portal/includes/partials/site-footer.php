@@ -6,9 +6,8 @@ declare(strict_types=1);
 <footer class="site-footer">
     <div class="container footer-grid">
         <div class="footer-brand-block">
-            <a href="/" class="footer-brand" aria-label="GroceryGo home">
-                <img src="/assets/logo/GroceryGo-main.png" alt="GroceryGo logo" class="footer-logo">
-                <span>GroceryGo</span>
+            <a href="<?= h(app_url()) ?>" class="footer-brand" aria-label="GroceryGo home">
+                <img src="<?= h(app_url('assets/logo/GroceryGo-main.png')) ?>" alt="GroceryGo" class="footer-logo">
             </a>
             <p class="footer-text">
                 Your neighborhood marketplace for fresh groceries, local traders, and easy community pickup.
@@ -18,27 +17,27 @@ declare(strict_types=1);
         <div>
             <h3>Traders</h3>
             <ul class="footer-links">
-                <li><a href="/#about">Browse local shops</a></li>
-                <li><a href="#">Become a trader</a></li>
-                <li><a href="/#about">Shop categories</a></li>
+                <li><a href="<?= h(app_url('shops')) ?>">Browse local shops</a></li>
+                <li><a href="<?= h(portal_url('register.php')) ?>">Become a trader</a></li>
+                <li><a href="<?= h(app_url('categories')) ?>">Shop categories</a></li>
             </ul>
         </div>
 
         <div>
             <h3>Privacy</h3>
             <ul class="footer-links">
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms and Conditions</a></li>
-                <li><a href="#">Cookie notice</a></li>
+                <li><a href="<?= h(app_url('about')) ?>">Privacy Policy</a></li>
+                <li><a href="<?= h(app_url('about')) ?>">Terms and Conditions</a></li>
+                <li><a href="<?= h(app_url('about')) ?>">Cookie notice</a></li>
             </ul>
         </div>
 
         <div>
             <h3>Know More</h3>
             <ul class="footer-links">
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/#how-it-works">How it works</a></li>
-                <li><a href="/contact">Help &amp; support</a></li>
+                <li><a href="<?= h(app_url('about')) ?>">About Us</a></li>
+                <li><a href="<?= h(app_url()) ?>#how-it-works">How it works</a></li>
+                <li><a href="<?= h(app_url('contact')) ?>">Help &amp; support</a></li>
             </ul>
         </div>
 
@@ -47,7 +46,6 @@ declare(strict_types=1);
             <ul class="footer-links">
                 <li><a href="mailto:support.aim@tbc.edu.np">support.aim@tbc.edu.np</a></li>
                 <li><a href="tel:9840000000">9840******</a></li>
-                <li><a href="#">Facebook</a> | <a href="#">Instagram</a></li>
             </ul>
         </div>
     </div>

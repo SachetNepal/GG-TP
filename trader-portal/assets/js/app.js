@@ -256,6 +256,8 @@
             showToast("Product saved.", "ok");
             if (typeof after === "function") {
               after();
+            } else if (form.dataset.redirectPublished) {
+              window.location.href = form.dataset.redirectPublished;
             }
           } else {
             showToast(j.error || "Save failed", "error");
@@ -304,9 +306,47 @@
     });
   }
 
+  function initDeleteButtons() {
+    qsa(".btn-delete-product").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!confirm("Delete this product?")) {
+          return;
+        }
+        var url = btn.getAttribute("data-delete-url");
+        var pid = btn.getAttribute("data-product-id");
+        var csrfMeta = qs('meta[name="csrf-token"]');
+        var csrf = csrfMeta ? csrfMeta.getAttribute("content") : "";
+        var fd = new FormData();
+        fd.append("product_id", pid);
+        fd.append("_csrf", csrf);
+        fetch(url, {
+          method: "POST",
+          body: fd,
+          credentials: "same-origin",
+          headers: csrf ? { "X-CSRF-TOKEN": csrf } : {},
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (j) {
+            if (j.ok) {
+              showToast("Product deleted.");
+              window.location.reload();
+            } else {
+              showToast(j.error || "Delete failed", "error");
+            }
+          })
+          .catch(function () {
+            showToast("Network error", "error");
+          });
+      });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     initDashboardChart();
     refreshStats();
     initProductForm();
+    initDeleteButtons();
   });
 })();

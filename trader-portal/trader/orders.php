@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 
 $q = trim((string) ($_GET['q'] ?? ''));
 $st = trim((string) ($_GET['status'] ?? ''));
@@ -27,13 +27,13 @@ if ($st !== '') {
 }
 
 $orders = [];
-if ($shopId > 0) {
+if (trader_has_shop($me)) {
     try {
         $orders = db_fetch_all(
             "SELECT o.order_id, o.amount, o.status AS order_status, o.order_date,
                     u.first_name, u.last_name, pay.payment_status
-             FROM \"ORDER\" o
-             INNER JOIN \"USER\" u ON u.user_id = o.user_id
+             FROM orders o
+             INNER JOIN users u ON u.user_id = o.customer_id
              LEFT JOIN payment pay ON pay.order_id = o.order_id
              WHERE $filter
              ORDER BY o.order_date DESC
@@ -51,6 +51,9 @@ require_once dirname(__DIR__) . '/includes/header.php';
 ?>
     <section class="panel">
         <h1 class="panel-title">Orders</h1>
+        <?php if (! trader_has_shop($me)): ?>
+            <p class="muted">Link a shop to your account to view orders.</p>
+        <?php else: ?>
         <form method="get" class="form-grid cols-2" style="margin-bottom:18px;">
             <div>
                 <label for="q">Search</label>
@@ -60,7 +63,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 <label for="status">Order status</label>
                 <select class="input" id="status" name="status">
                     <option value="">All</option>
-                    <?php foreach (['pending','accepted','preparing','ready','completed','cancelled'] as $opt): ?>
+                    <?php foreach (['pending','accepted','preparing','ready','completed','cancelled','placed'] as $opt): ?>
                         <option value="<?= h($opt) ?>" <?= $st === $opt ? 'selected' : '' ?>><?= h(ucfirst($opt)) ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -88,18 +91,20 @@ require_once dirname(__DIR__) . '/includes/header.php';
                         <tr><td colspan="6" class="muted">No orders found.</td></tr>
                     <?php else: ?>
                         <?php foreach ($orders as $o): ?>
+                            <?php $oid = (string) ($o['order_id'] ?? ''); ?>
                             <tr>
-                                <td>#<?= (int) ($o['order_id'] ?? 0) ?></td>
+                                <td>#<?= h($oid) ?></td>
                                 <td><?= h(trim((string) ($o['first_name'] ?? '') . ' ' . (string) ($o['last_name'] ?? ''))) ?></td>
                                 <td>£<?= number_format((float) ($o['amount'] ?? 0), 2) ?></td>
                                 <td><?= h((string) ($o['payment_status'] ?? '—')) ?></td>
                                 <td><span class="pill"><?= h((string) ($o['order_status'] ?? '')) ?></span></td>
-                                <td><a class="btn btn-outline" style="padding:6px 12px;font-size:13px;" href="<?= h(portal_url('trader/order-details.php?id=' . (int) ($o['order_id'] ?? 0))) ?>">View</a></td>
+                                <td><a class="btn btn-outline" style="padding:6px 12px;font-size:13px;" href="<?= h(portal_url('trader/order-details.php?id=' . rawurlencode($oid))) ?>">View</a></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </section>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

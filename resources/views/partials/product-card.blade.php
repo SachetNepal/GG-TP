@@ -12,7 +12,7 @@
 
 {{-- Shared product card (used in Categories + You May Like) --}}
 <article class="card product-card">
-    <a href="/products/{{ $id }}" class="product-card-link" aria-label="View {{ $name }}">
+    <a href="{{ route('products.show', $id) }}" class="product-card-link" aria-label="View {{ $name }}">
         <div class="product-image-placeholder" aria-hidden="true">
             <span class="product-image-placeholder-text">Image</span>
         </div>

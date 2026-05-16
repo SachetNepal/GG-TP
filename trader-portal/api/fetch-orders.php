@@ -11,11 +11,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
 }
 
 $me = auth_user();
-if (!$me || strtolower($me['role']) !== 'trader' || (int) $me['shop_id'] < 1) {
+if (!$me || ($me['trader_id'] ?? '') === '' || ! trader_has_shop($me)) {
     json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
 }
 
-$shopId = (int) $me['shop_id'];
+$shopId = trader_shop_id($me);
 $q = trim((string) ($_GET['q'] ?? ''));
 $status = trim((string) ($_GET['status'] ?? ''));
 $page = max(1, (int) ($_GET['page'] ?? 1));
@@ -43,8 +43,8 @@ try {
     $rows = db_fetch_all(
         "SELECT o.order_id, o.amount, o.status AS order_status, o.order_date,
                 u.first_name, u.last_name, pay.payment_status
-         FROM \"ORDER\" o
-         INNER JOIN \"USER\" u ON u.user_id = o.user_id
+         FROM orders o
+         INNER JOIN users u ON u.user_id = o.customer_id
          LEFT JOIN payment pay ON pay.order_id = o.order_id
          WHERE $filter
          ORDER BY o.order_date DESC
@@ -53,8 +53,8 @@ try {
     );
 
     $total = (int) (db_fetch_scalar(
-        "SELECT COUNT(*) FROM \"ORDER\" o
-         INNER JOIN \"USER\" u ON u.user_id = o.user_id
+        "SELECT COUNT(*) FROM orders o
+         INNER JOIN users u ON u.user_id = o.customer_id
          WHERE $filter",
         $binds
     ) ?? 0);

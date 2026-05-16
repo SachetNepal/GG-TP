@@ -44,7 +44,7 @@ require_once __DIR__ . '/includes/header.php';
       <article class="card auth-card">
         <header class="auth-header">
           <h1>Trader sign in</h1>
-          <p class="text-secondary">Oracle-backed session · role must be <code>trader</code></p>
+          <p class="text-secondary">Demo: james.taylor@email.com / trader123 (Cleckheaton Butchers)</p>
         </header>
         <?php if ($error !== ''): ?>
             <div class="alert alert-error"><?= h($error) ?></div>

@@ -12,13 +12,17 @@ class Trader extends BaseOracleModel
     protected $primaryKey = 'trader_id';
     public $timestamps = false;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
-        'user_id',
+        'trader_id',
+        'admin_id',
     ];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'trader_id', 'user_id');
     }
 
     public function shop(): HasOne

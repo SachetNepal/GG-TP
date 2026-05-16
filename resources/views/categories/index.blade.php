@@ -3,69 +3,86 @@
 @section('title', 'GroceryGo - Categories')
 
 @section('content')
-    {{-- Page title --}}
     @include('partials.page-hero', ['title' => 'Categories'])
 
-    {{-- Categories + Filters --}}
     <section class="section">
         <div class="container categories-layout">
-            {{-- Left filter sidebar --}}
             <aside class="card filters-sidebar">
                 <h2 class="filters-title">Filters</h2>
 
-                <div class="filters-block">
-                    <h3>Categories</h3>
-                    @php
-                        $categoryOptions = ['Vegetables', 'Bakery', 'Dairy', 'Meat', 'Groceries'];
-                    @endphp
-                    <div class="filters-options">
-                        @foreach($categoryOptions as $opt)
-                            <label class="filter-option">
-                                <input type="checkbox" name="categories[]" value="{{ $opt }}">
-                                <span>{{ $opt }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
+                <form method="get" action="{{ route('categories') }}" class="filters-form">
+                    @if (!empty($filters['q']))
+                        <input type="hidden" name="q" value="{{ $filters['q'] }}">
+                    @endif
 
-                <div class="filters-block">
-                    <h3>Trader / Shop</h3>
-                    @php
-                        $shopOptions = ['Butcher', 'Greengrocer', 'Bakery', 'Fishmonger', 'Delicatessen'];
-                    @endphp
-                    <div class="filters-options">
-                        @foreach($shopOptions as $opt)
-                            <label class="filter-option">
-                                <input type="checkbox" name="shops[]" value="{{ $opt }}">
-                                <span>{{ $opt }}</span>
-                            </label>
-                        @endforeach
+                    <div class="filters-block">
+                        <h3>Categories</h3>
+                        <div class="filters-options">
+                            @foreach ($categories as $cat)
+                                <label class="filter-option">
+                                    <input type="checkbox"
+                                           name="category_id[]"
+                                           value="{{ $cat->category_id }}"
+                                           @checked(in_array($cat->category_id, $filters['category_id'] ?? [], true))>
+                                    <span>{{ $cat->category_name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
 
-                <button type="button" class="btn btn-primary filters-apply-btn">Apply Filters</button>
+                    <div class="filters-block">
+                        <h3>Trader / Shop</h3>
+                        <div class="filters-options">
+                            @foreach ($shops as $shop)
+                                <label class="filter-option">
+                                    <input type="checkbox"
+                                           name="shop_id[]"
+                                           value="{{ $shop->shop_id }}"
+                                           @checked(in_array($shop->shop_id, $filters['shop_id'] ?? [], true))>
+                                    <span>{{ $shop->shop_name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary filters-apply-btn">Apply Filters</button>
+                    <a href="{{ route('categories') }}" class="btn btn-outline" style="margin-top:8px;display:block;text-align:center;">Clear</a>
+                </form>
             </aside>
 
-            {{-- Right product grid --}}
             <div class="categories-main">
-                <div class="product-grid">
-                    @php
-                        $products = [
-                            ['id' => 1, 'trader' => 'Greengrocer', 'category' => 'Vegetables', 'name' => 'Fresh Tomatoes', 'price' => 120, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                            ['id' => 2, 'trader' => 'Bakery', 'category' => 'Bakery', 'name' => 'Sourdough Bread', 'price' => 220, 'stock' => ['label' => 'Low Stock', 'variant' => 'low']],
-                            ['id' => 3, 'trader' => 'Butcher', 'category' => 'Meat', 'name' => 'Chicken Breast', 'price' => 520, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                            ['id' => 4, 'trader' => 'Delicatessen', 'category' => 'Groceries', 'name' => 'Olive Oil', 'price' => 540, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                            ['id' => 5, 'trader' => 'Fishmonger', 'category' => 'Groceries', 'name' => 'Fresh Salmon', 'price' => 980, 'stock' => ['label' => 'Out of Stock', 'variant' => 'out']],
-                            ['id' => 6, 'trader' => 'Greengrocer', 'category' => 'Dairy', 'name' => 'Farm Eggs (10pc)', 'price' => 160, 'stock' => ['label' => 'In Stock', 'variant' => 'in']],
-                        ];
-                    @endphp
+                @if (!empty($filters['q']))
+                    <p class="text-secondary" style="margin-bottom:12px;">Search: “{{ $filters['q'] }}”</p>
+                @endif
 
-                    @foreach($products as $product)
+                <div class="product-grid">
+                    @forelse($products as $p)
+                        @php
+                            $stock = (int) ($p->product_in_stock ?? 0);
+                            $product = [
+                                'id' => $p->product_id,
+                                'trader' => $p->shop->shop_name ?? 'Shop',
+                                'category' => $p->category->category_name ?? '',
+                                'name' => $p->product_name,
+                                'price' => (float) $p->price,
+                                'stock' => [
+                                    'label' => $stock <= 0 ? 'Out of Stock' : ($stock <= 5 ? 'Low Stock' : 'In Stock'),
+                                    'variant' => $stock <= 0 ? 'out' : ($stock <= 5 ? 'low' : 'in'),
+                                ],
+                            ];
+                        @endphp
                         @include('partials.product-card', ['product' => $product])
-                    @endforeach
+                    @empty
+                        <p class="muted">No products match your filters.</p>
+                    @endforelse
                 </div>
+
+                @if ($products->hasPages())
+                    <div class="pagination-wrap" style="margin-top:20px;">
+                        {{ $products->withQueryString()->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </section>
 @endsection
-

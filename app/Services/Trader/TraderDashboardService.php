@@ -24,7 +24,7 @@ class TraderDashboardService
             ->whereHas('items.product', fn ($q) => $q->whereIn('shop_id', $shopIds));
 
         $todayOrders = (clone $ordersQuery)->whereDate('order_date', $today)->count();
-        $pendingOrders = (clone $ordersQuery)->where('status', 'pending')->count();
+        $pendingOrders = (clone $ordersQuery)->whereIn('status', ['pending', 'placed'])->count();
         $weeklyEarnings = (clone $ordersQuery)
             ->whereBetween('order_date', [$weekStart, $weekEnd])
             ->sum('amount');

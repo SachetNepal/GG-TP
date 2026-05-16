@@ -10,13 +10,20 @@
                 {{-- 1. Center Card Layout --}}
                 <header class="auth-header">
                     <h1>Login</h1>
-                    <p>Welcome back to GroceryGo.</p>
+                    <p>Welcome back to GroceryGo. Demo: john.smith@email.com / pass123</p>
                 </header>
 
-                <form class="auth-form" method="get" action="/login">
+                @if (session('status'))
+                    <p class="ok" style="margin-bottom:12px;">{{ session('status') }}</p>
+                @endif
+                @if ($errors->any())
+                    <p class="alert alert-error" style="margin-bottom:12px;">{{ $errors->first() }}</p>
+                @endif
+                <form class="auth-form" method="post" action="{{ route('login') }}">
+                    @csrf
                     <div class="field-group">
                         <label for="loginEmail">Email</label>
-                        <input id="loginEmail" name="email" type="email" placeholder="you@example.com" required>
+                        <input id="loginEmail" name="email" type="email" value="{{ old('email') }}" placeholder="you@example.com" required>
                     </div>
 
                     <div class="field-group">
@@ -29,7 +36,7 @@
                             <input id="rememberMe" name="remember" type="checkbox">
                             <span>Remember me</span>
                         </label>
-                        <a href="#" class="forgot-link">Forgot password?</a>
+                        <a href="{{ route('contact') }}" class="forgot-link">Forgot password?</a>
                     </div>
 
                     {{-- 2. Primary Button --}}
@@ -42,12 +49,11 @@
                 </div>
 
                 {{-- 4. Secondary Button --}}
-                <a href="/register-type" class="btn auth-secondary-btn">Register</a>
+                <a href="{{ route('register-type') }}" class="btn auth-secondary-btn">Register</a>
 
                 {{-- 5. Role Switch --}}
                 <div class="auth-role-switch">
-                    <a href="#" class="btn auth-role-btn">Trader</a>
-                    <a href="#" class="btn auth-role-btn">Admin</a>
+                    <a href="/GG-TP/trader-portal/login.php" class="btn auth-role-btn">Trader</a>
                 </div>
             </article>
         </div>

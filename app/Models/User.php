@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class User extends Authenticatable
 {
     protected $connection = 'oracle';
-    protected $table = 'USER';
+    protected $table = 'USERS';
     protected $primaryKey = 'user_id';
     public $timestamps = false;
-    protected $keyType = 'int';
-    public $incrementing = true;
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',
@@ -24,7 +25,6 @@ class User extends Authenticatable
         'phone_num',
         'address',
         'created_at',
-        'role',
     ];
 
     protected $hidden = [
@@ -35,7 +35,6 @@ class User extends Authenticatable
     {
         return [
             'created_at' => 'datetime',
-            'password' => 'hashed',
         ];
     }
 
@@ -53,12 +52,28 @@ class User extends Authenticatable
 
     public function customer(): HasOne
     {
-        return $this->hasOne(Customer::class, 'user_id', 'user_id');
+        return $this->hasOne(Customer::class, 'customer_id', 'user_id');
+    }
+
+    /** USERS table has no role column; customers have a CUSTOMER row with matching id. */
+    public function getRoleAttribute(): string
+    {
+        if ($this->relationLoaded('customer')) {
+            return $this->customer ? 'customer' : 'guest';
+        }
+
+        if (Trader::query()->where('trader_id', $this->user_id)->exists()) {
+            return 'trader';
+        }
+
+        return Customer::query()->where('customer_id', $this->user_id)->exists()
+            ? 'customer'
+            : 'guest';
     }
 
     public function trader(): HasOne
     {
-        return $this->hasOne(Trader::class, 'user_id', 'user_id');
+        return $this->hasOne(Trader::class, 'trader_id', 'user_id');
     }
 
     public function admin(): HasOne

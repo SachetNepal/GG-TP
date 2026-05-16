@@ -11,7 +11,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $me = auth_user();
-if (!$me || strtolower($me['role']) !== 'trader' || (int) $me['shop_id'] < 1) {
+if (!$me || strtolower($me['role']) !== 'trader' || ! trader_has_shop($me)) {
     json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
 }
 
@@ -19,15 +19,15 @@ if (!portal_verify_csrf()) {
     json_response(['ok' => false, 'error' => 'CSRF'], 419);
 }
 
-$shopId = (int) $me['shop_id'];
-$pid = (int) ($_POST['product_id'] ?? 0);
+$shopId = trader_shop_id($me);
+$pid = trim((string) ($_POST['product_id'] ?? ''));
 $name = trim((string) ($_POST['product_name'] ?? ''));
 $desc = trim((string) ($_POST['description'] ?? ''));
-$categoryId = (int) ($_POST['category_id'] ?? 0);
+$categoryId = trim((string) ($_POST['category_id'] ?? ''));
 $price = (float) str_replace(',', '.', (string) ($_POST['price'] ?? '0'));
 $stock = (int) ($_POST['stock'] ?? 0);
 
-if ($pid < 1 || $name === '' || $categoryId < 1 || $price <= 0) {
+if ($pid === '' || $name === '' || $categoryId === '' || $price <= 0) {
     json_response(['ok' => false, 'error' => 'Validation failed'], 422);
 }
 

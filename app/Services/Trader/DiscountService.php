@@ -16,7 +16,7 @@ class DiscountService
         abort_if(!$trader, 403, 'Trader profile required');
 
         $product = Product::query()->with('shop')->findOrFail($data['product_id']);
-        abort_if((int) $product->shop?->trader_id !== (int) $trader->trader_id, 403, 'Cannot apply discount to this product');
+        abort_if((string) $product->shop?->trader_id !== (string) $trader->trader_id, 403, 'Cannot apply discount to this product');
 
         return DB::connection('oracle')->transaction(function () use ($data, $product) {
             $discount = Discount::create([

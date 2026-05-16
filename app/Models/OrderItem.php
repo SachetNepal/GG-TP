@@ -11,6 +11,7 @@ class OrderItem extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
+        'order_item_id',
         'quantity',
         'price',
         'order_id',

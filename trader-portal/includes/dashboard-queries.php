@@ -1,14 +1,13 @@
 <?php
 /**
- * Dashboard aggregations for a shop. Quoted "ORDER" and "USER" for Oracle reserved words.
- * Adjust COLLECTION_SLOT column names if your physical columns differ (e.g. SLOT_DATE vs DATE).
+ * Dashboard aggregations for a shop (Oracle: ORDERS, USERS, ORDER_ITEM).
  */
 declare(strict_types=1);
 
 /**
  * @return array<string, mixed>
  */
-function trader_dashboard_data(int $shopId): array
+function trader_dashboard_data(string $shopId): array
 {
     $out = [
         'revenue' => 0.0,
@@ -22,7 +21,7 @@ function trader_dashboard_data(int $shopId): array
         'top_products' => [],
     ];
 
-    if ($shopId < 1) {
+    if ($shopId === '') {
         return $out;
     }
 
@@ -32,7 +31,7 @@ function trader_dashboard_data(int $shopId): array
 
     try {
         $rev = (float) (db_fetch_scalar(
-            "SELECT NVL(SUM(o.amount), 0) FROM \"ORDER\" o
+            "SELECT NVL(SUM(o.amount), 0) FROM orders o
              WHERE o.order_id IN ($shopOrdersSub)
              AND o.order_date >= TRUNC(SYSDATE, 'IW')
              AND o.order_date < TRUNC(SYSDATE, 'IW') + 7",
@@ -40,7 +39,7 @@ function trader_dashboard_data(int $shopId): array
         ) ?? 0);
 
         $ord = (int) (db_fetch_scalar(
-            "SELECT COUNT(DISTINCT o.order_id) FROM \"ORDER\" o
+            "SELECT COUNT(DISTINCT o.order_id) FROM orders o
              WHERE o.order_id IN ($shopOrdersSub)
              AND o.order_date >= TRUNC(SYSDATE, 'IW')
              AND o.order_date < TRUNC(SYSDATE, 'IW') + 7",
@@ -53,7 +52,6 @@ function trader_dashboard_data(int $shopId): array
             ['sid' => $shopId]
         ) ?? 0);
 
-        // Collection slots linked to this shop's orders (upcoming window optional)
         $slot = (int) (db_fetch_scalar(
             "SELECT COUNT(*) FROM collection_slot cs
              WHERE cs.order_id IN ($shopOrdersSub)",
@@ -63,7 +61,7 @@ function trader_dashboard_data(int $shopId): array
         $dailyRows = db_fetch_all(
             "SELECT TO_CHAR(TRUNC(o.order_date), 'DY', 'NLS_DATE_LANGUAGE=ENGLISH') AS day_label,
                     NVL(SUM(o.amount), 0) AS amt
-             FROM \"ORDER\" o
+             FROM orders o
              WHERE o.order_id IN ($shopOrdersSub)
              AND o.order_date >= TRUNC(SYSDATE, 'IW')
              AND o.order_date < TRUNC(SYSDATE, 'IW') + 7
@@ -85,8 +83,8 @@ function trader_dashboard_data(int $shopId): array
                 SELECT o.order_id, o.amount, o.status AS order_status,
                        TRIM(u.first_name || ' ' || u.last_name) AS customer_name,
                        o.order_date
-                FROM \"ORDER\" o
-                INNER JOIN \"USER\" u ON u.user_id = o.user_id
+                FROM orders o
+                INNER JOIN users u ON u.user_id = o.customer_id
                 WHERE o.order_id IN ($shopOrdersSub)
                 ORDER BY o.order_date DESC
             ) WHERE ROWNUM <= 8",
@@ -104,7 +102,7 @@ function trader_dashboard_data(int $shopId): array
                             ELSE 'OK' END AS stock_status
                 FROM order_item oi
                 INNER JOIN product p ON p.product_id = oi.product_id
-                INNER JOIN \"ORDER\" o ON o.order_id = oi.order_id
+                INNER JOIN orders o ON o.order_id = oi.order_id
                 WHERE p.shop_id = :sid
                 AND o.order_date >= TRUNC(SYSDATE, 'IW')
                 GROUP BY p.product_id, p.product_name, p.product_in_stock

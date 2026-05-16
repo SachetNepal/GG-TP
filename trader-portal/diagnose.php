@@ -5,6 +5,18 @@
  */
 declare(strict_types=1);
 
+$configPath = __DIR__ . '/config.php';
+if (is_readable($configPath)) {
+    require_once $configPath;
+}
+
+$allowed = defined('PORTAL_DIAGNOSE_ENABLED') && PORTAL_DIAGNOSE_ENABLED;
+$local = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true);
+if (!$allowed && !$local) {
+    http_response_code(404);
+    exit('Not found');
+}
+
 header('Content-Type: text/html; charset=UTF-8');
 
 echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Trader portal diagnostics</title>';
@@ -18,18 +30,15 @@ $oci = extension_loaded('oci8');
 echo '<p>OCI8 extension: ' . ($oci ? '<span class="ok">loaded</span>' : '<span class="bad">NOT loaded</span> — edit <code>php.ini</code> and enable <code>extension=oci8_12c</code> (or your DLL), restart Apache.</p>');
 
 echo '<h2>2. Config file</h2>';
-$configPath = __DIR__ . '/config.php';
-if (!is_readable($configPath)) {
+if (!defined('PORTAL_BASE')) {
     echo '<p class="bad">Missing <code>config.php</code>. Copy <code>config.example.php</code> to <code>config.php</code>.</p>';
     echo '</body></html>';
     exit;
 }
-echo '<p class="ok"><code>config.php</code> found.</p>';
-require_once $configPath;
+echo '<p class="ok"><code>config.php</code> loaded.</p>';
 
 echo '<h2>3. Oracle connection test</h2>';
-echo '<p>DSN in use: <code>' . htmlspecialchars((string) ORACLE_DSN) . '</code></p>';
-echo '<p>User: <code>' . htmlspecialchars((string) ORACLE_USER) . '</code></p>';
+echo '<p>Credentials and DSN: <code>db.php</code> at project root.</p>';
 
 if (!$oci) {
     echo '<p class="bad">Skipping live connect — OCI8 not available.</p>';
@@ -37,21 +46,11 @@ if (!$oci) {
     exit;
 }
 
-$c = @oci_connect(ORACLE_USER, ORACLE_PASS, ORACLE_DSN, 'AL32UTF8');
-if ($c) {
+require_once dirname(__DIR__) . '/db.php';
+if (!empty($conn)) {
     echo '<p class="ok"><strong>Connection succeeded.</strong></p>';
-    oci_close($c);
 } else {
-    $e = oci_error();
-    $msg = $e['message'] ?? 'Unknown error';
-    echo '<p class="bad"><strong>Connection failed.</strong></p>';
-    echo '<pre style="background:#fef2f2;padding:12px;border-radius:8px;">' . htmlspecialchars($msg) . '</pre>';
-    echo '<p><strong>Typical fixes:</strong></p><ul>';
-    echo '<li>Oracle DB / listener running (Windows service <code>OracleServiceXE</code>, <code>TNS Listener</code>).</li>';
-    echo '<li>Correct service name in DSN, e.g. <code>localhost/XEPDB1</code> or <code>localhost/orclpdb1</code>.</li>';
-    echo '<li>Oracle Instant Client matches PHP OCI8 (64-bit vs 32-bit).</li>';
-    echo '<li>Firewall allowing port 1521.</li>';
-    echo '</ul>';
+    echo '<p class="bad"><strong>Connection failed.</strong> Check <code>db.php</code> credentials and listener.</p>';
 }
 
 echo '<h2>4. URL / PORTAL_BASE</h2>';

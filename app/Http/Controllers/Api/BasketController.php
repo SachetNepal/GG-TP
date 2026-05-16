@@ -24,7 +24,7 @@ class BasketController extends Controller
 
     public function addItem(AddBasketItemRequest $request): JsonResponse
     {
-        $basket = $this->service->addItem($request->user(), (int) $request->validated()['product_id']);
+        $basket = $this->service->addItem($request->user(), $request->validated()['product_id']);
 
         return response()->json([
             'message' => 'Item added to basket',
@@ -32,7 +32,7 @@ class BasketController extends Controller
         ], 201);
     }
 
-    public function updateItem(UpdateBasketItemRequest $request, int $basketItemId): JsonResponse
+    public function updateItem(UpdateBasketItemRequest $request, string $basketItemId): JsonResponse
     {
         $basket = $this->service->updateItemQuantity($request->user(), $basketItemId, (int) $request->validated()['quantity']);
 
@@ -42,7 +42,7 @@ class BasketController extends Controller
         ]);
     }
 
-    public function removeItem(Request $request, int $basketItemId): JsonResponse
+    public function removeItem(Request $request, string $basketItemId): JsonResponse
     {
         $basket = $this->service->removeItem($request->user(), $basketItemId);
 

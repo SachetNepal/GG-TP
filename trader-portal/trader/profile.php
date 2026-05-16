@@ -5,11 +5,11 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$uid = (int) $me['user_id'];
-$shopId = (int) $me['shop_id'];
+$uid = (string) $me['user_id'];
+$shopId = (string) $me['shop_id'];
 
-$userRow = db_fetch_one('SELECT * FROM "USER" WHERE user_id = :id', ['id' => $uid]) ?? [];
-$shopRow = $shopId > 0
+$userRow = db_fetch_one('SELECT * FROM users WHERE user_id = :id', ['id' => $uid]) ?? [];
+$shopRow = $shopId !== ''
     ? (db_fetch_one('SELECT * FROM shop WHERE shop_id = :id', ['id' => $shopId]) ?? [])
     : [];
 
@@ -27,14 +27,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
         try {
             $st1 = db_execute(
-                'UPDATE "USER" SET phone_num = :p, email = :e WHERE user_id = :uid',
-                ['p' => $phone, 'e' => $email, 'uid' => $uid]
+                'UPDATE users SET phone_num = :p, email = :e WHERE user_id = :user_id',
+                ['p' => $phone, 'e' => $email, 'user_id' => $uid]
             );
             if ($st1) {
                 oci_free_statement($st1);
             }
 
-            if ($shopId > 0) {
+            if ($shopId !== '' && $shopId !== '0') {
                 $locMeta = 'CAT:' . $category . '|DESC:' . substr($desc, 0, 500)
                     . '|CO:' . $cutoff . '|MAX:' . $maxSlot;
                 $st2 = db_execute(

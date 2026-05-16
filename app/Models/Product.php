@@ -11,7 +11,6 @@ class Product extends BaseOracleModel
     protected $table = 'PRODUCT';
     protected $primaryKey = 'product_id';
     public $timestamps = false;
-
     protected $fillable = [
         'product_name',
         'description',
@@ -26,6 +25,8 @@ class Product extends BaseOracleModel
         return [
             'price' => 'float',
             'product_in_stock' => 'integer',
+            'shop_id' => 'string',
+            'category_id' => 'string',
         ];
     }
 

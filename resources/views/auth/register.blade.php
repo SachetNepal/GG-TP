@@ -14,28 +14,24 @@
                 </header>
 
                 {{-- Register form (UI only until backend/auth is wired) --}}
-                <form class="auth-form" method="get" action="/register">
+                <form class="auth-form" method="post" action="{{ route('register') }}">
+                    @csrf
                     <div class="auth-form-grid">
                         {{-- Left column --}}
                         <div class="auth-form-col">
                             <div class="field-group">
                                 <label for="firstName">First Name</label>
-                                <input id="firstName" name="firstName" type="text" required>
+                                <input id="firstName" name="first_name" type="text" required>
                             </div>
 
                             <div class="field-group">
                                 <label for="lastName">Last Name</label>
-                                <input id="lastName" name="lastName" type="text" required>
-                            </div>
-
-                            <div class="field-group">
-                                <label for="username">Username</label>
-                                <input id="username" name="username" type="text" required>
+                                <input id="lastName" name="last_name" type="text" required>
                             </div>
 
                             <div class="field-group">
                                 <label for="phone">Phone Number</label>
-                                <input id="phone" name="phone" type="tel" required>
+                                <input id="phone" name="phone_num" type="tel" required>
                             </div>
                         </div>
 
@@ -75,7 +71,7 @@
                 </div>
 
                 {{-- 4) Secondary button --}}
-                <a href="/login" class="btn auth-secondary-btn">
+                <a href="{{ route('login') }}" class="btn auth-secondary-btn">
                     Login
                 </a>
             </article>

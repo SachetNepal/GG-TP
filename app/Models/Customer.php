@@ -12,13 +12,16 @@ class Customer extends BaseOracleModel
     protected $primaryKey = 'customer_id';
     public $timestamps = false;
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
-        'user_id',
+        'customer_id',
     ];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'customer_id');
     }
 
     public function basket(): HasOne

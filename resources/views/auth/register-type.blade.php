@@ -13,12 +13,12 @@
                 </header>
 
                 <div class="auth-choice-grid">
-                    <a class="auth-choice-card" href="/register?type=customer">
+                    <a class="auth-choice-card" href="{{ route('register', ['type' => 'customer']) }}">
                         <h2>Register as Customer</h2>
                         <p>Shop local stores and collect your orders.</p>
                     </a>
 
-                    <a class="auth-choice-card auth-choice-card--orange" href="/register?type=trader">
+                    <a class="auth-choice-card auth-choice-card--orange" href="{{ route('register', ['type' => 'trader']) }}">
                         <h2>Register as Trader</h2>
                         <p>List your products and manage your shop.</p>
                     </a>

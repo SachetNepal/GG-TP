@@ -5,10 +5,10 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
-$shopId = (int) $me['shop_id'];
-$oid = (int) ($_GET['id'] ?? 0);
+$shopId = trader_shop_id($me);
+$oid = trim((string) ($_GET['id'] ?? ''));
 
-if ($oid < 1 || $shopId < 1) {
+if ($oid === '' || ! trader_has_shop($me)) {
     portal_redirect('/trader/orders.php');
 }
 
@@ -27,8 +27,8 @@ if ((int) $allowed < 1) {
 $order = db_fetch_one(
     "SELECT o.*, u.first_name, u.last_name, u.email, u.phone_num,
             pay.payment_status, pay.paid_amount
-     FROM \"ORDER\" o
-     INNER JOIN \"USER\" u ON u.user_id = o.user_id
+     FROM orders o
+     INNER JOIN users u ON u.user_id = o.customer_id
      LEFT JOIN payment pay ON pay.order_id = o.order_id
      WHERE o.order_id = :oid",
     ['oid' => $oid]
@@ -48,7 +48,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
 ?>
     <section class="panel">
         <p class="muted"><a href="<?= h(portal_url('trader/orders.php')) ?>">← Back to orders</a></p>
-        <h1 class="panel-title">Order #<?= (int) $oid ?></h1>
+        <h1 class="panel-title">Order #<?= h($oid) ?></h1>
         <?php if ($order): ?>
             <p><strong>Customer:</strong> <?= h(trim((string) ($order['first_name'] ?? '') . ' ' . (string) ($order['last_name'] ?? ''))) ?></p>
             <p><strong>Email:</strong> <?= h((string) ($order['email'] ?? '')) ?></p>

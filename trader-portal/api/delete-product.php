@@ -11,7 +11,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $me = auth_user();
-if (!$me || strtolower($me['role']) !== 'trader' || (int) $me['shop_id'] < 1) {
+if (!$me || strtolower($me['role']) !== 'trader' || ! trader_has_shop($me)) {
     json_response(['ok' => false, 'error' => 'Unauthorized'], 401);
 }
 
@@ -19,10 +19,10 @@ if (!portal_verify_csrf()) {
     json_response(['ok' => false, 'error' => 'CSRF'], 419);
 }
 
-$pid = (int) ($_POST['product_id'] ?? 0);
-$shopId = (int) $me['shop_id'];
+$pid = trim((string) ($_POST['product_id'] ?? ''));
+$shopId = trader_shop_id($me);
 
-if ($pid < 1) {
+if ($pid === '') {
     json_response(['ok' => false, 'error' => 'Invalid product'], 422);
 }
 

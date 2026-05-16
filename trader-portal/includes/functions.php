@@ -65,6 +65,39 @@ function portal_url(string $path): string
     return ($base !== '' ? $base : '') . '/' . ltrim($path, '/');
 }
 
+/** Customer site (Laravel) URL path */
+function app_url(string $path = ''): string
+{
+    $base = rtrim(defined('APP_BASE') ? APP_BASE : '', '/');
+    $path = ltrim($path, '/');
+    if ($path === '') {
+        return $base !== '' ? $base . '/' : '/';
+    }
+    return ($base !== '' ? $base : '') . '/' . $path;
+}
+
+/** Ensure upload directories exist under trader-portal/assets/uploads */
+function trader_shop_id(array $me): string
+{
+    return (string) ($me['shop_id'] ?? '');
+}
+
+function trader_has_shop(array $me): bool
+{
+    return trader_shop_id($me) !== '';
+}
+
+function portal_ensure_upload_dirs(): void
+{
+    $root = dirname(__DIR__) . '/assets/uploads';
+    foreach (['products', 'shop'] as $sub) {
+        $dir = $root . '/' . $sub;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+    }
+}
+
 function json_response(array $data, int $code = 200): never
 {
     http_response_code($code);

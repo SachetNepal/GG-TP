@@ -14,7 +14,8 @@ class AddBasketItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer'],
+            'product_id' => ['required', 'string', 'max:40'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:20'],
         ];
     }
 }

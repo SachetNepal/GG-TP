@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BasketItem extends BaseOracleModel
 {
-    protected $table = 'BASKET_ITEMS';
+    protected $table = 'BASKET_ITEM';
     protected $primaryKey = 'basket_item_id';
     public $timestamps = false;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'basket_id',
         'product_id',
+        'quantity',
     ];
 
     public function basket(): BelongsTo

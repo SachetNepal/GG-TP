@@ -16,7 +16,7 @@ class CheckoutRequest extends FormRequest
         return [
             'slot_date' => ['required', 'string', 'in:Wednesday,Thursday,Friday'],
             'slot_time' => ['required', 'string', 'in:10 AM – 1 PM,1 PM – 4 PM,4 PM – 7 PM'],
-            'payment_method' => ['required', 'string', 'max:60'],
+            'payment_method' => ['required', 'string', 'in:mock,paypal'],
         ];
     }
 }
