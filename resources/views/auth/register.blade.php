@@ -10,10 +10,17 @@
                 {{-- 1) Page title --}}
                 <header class="auth-header">
                     <h1>Sign Up</h1>
-                    <p>Email verification required after registration</p>
+                    <p>We will email you a 6-digit code to verify your account.</p>
                 </header>
 
-                {{-- Register form (UI only until backend/auth is wired) --}}
+                @if ($errors->any())
+                    <div class="alert alert-error" style="margin-bottom:12px;">
+                        @foreach ($errors->all() as $error)
+                            <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
                 <form class="auth-form" method="post" action="{{ route('register') }}">
                     @csrf
                     <div class="auth-form-grid">
@@ -21,17 +28,17 @@
                         <div class="auth-form-col">
                             <div class="field-group">
                                 <label for="firstName">First Name</label>
-                                <input id="firstName" name="first_name" type="text" required>
+                                <input id="firstName" name="first_name" type="text" value="{{ old('first_name') }}" required>
                             </div>
 
                             <div class="field-group">
                                 <label for="lastName">Last Name</label>
-                                <input id="lastName" name="last_name" type="text" required>
+                                <input id="lastName" name="last_name" type="text" value="{{ old('last_name') }}" required>
                             </div>
 
                             <div class="field-group">
                                 <label for="phone">Phone Number</label>
-                                <input id="phone" name="phone_num" type="tel" required>
+                                <input id="phone" name="phone_num" type="tel" value="{{ old('phone_num') }}" required>
                             </div>
                         </div>
 
@@ -39,7 +46,7 @@
                         <div class="auth-form-col">
                             <div class="field-group">
                                 <label for="email">Email</label>
-                                <input id="email" name="email" type="email" required>
+                                <input id="email" name="email" type="email" value="{{ old('email') }}" required>
                             </div>
 
                             <div class="field-group">
@@ -54,7 +61,7 @@
 
                             <div class="field-group">
                                 <label for="address">Address</label>
-                                <textarea id="address" name="address" rows="4" required></textarea>
+                                <textarea id="address" name="address" rows="4" required>{{ old('address') }}</textarea>
                             </div>
                         </div>
                     </div>

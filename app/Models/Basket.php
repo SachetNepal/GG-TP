@@ -14,6 +14,7 @@ class Basket extends BaseOracleModel
     protected $keyType = 'string';
 
     protected $fillable = [
+        'basket_id',
         'created_date',
         'customer_id',
     ];

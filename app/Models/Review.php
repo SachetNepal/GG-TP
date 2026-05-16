@@ -11,6 +11,7 @@ class Review extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
+        'review_id',
         'rating',
         'review_body',
         'review_date',

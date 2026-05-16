@@ -11,7 +11,12 @@ class Verification extends BaseOracleModel
     public $timestamps = false;
 
     protected $fillable = [
+        'verification_id',
         'verification_token',
+        'verification_code',
+        'email',
+        'purpose',
+        'status',
         'created_at',
         'expires_at',
         'is_verified',

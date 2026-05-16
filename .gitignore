@@ -1,7 +1,8 @@
 *.log
 .DS_Store
-.env
+# .env is committed so every clone uses the same DB/PayPal settings (private repo only)
 db.local.php
+db.txt
 .env.backup
 .env.production
 .phpactor.json

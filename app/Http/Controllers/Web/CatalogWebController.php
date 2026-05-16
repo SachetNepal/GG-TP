@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Services\Catalog\CatalogService;
+use App\Services\Review\ReviewService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class CatalogWebController extends Controller
 {
-    public function __construct(protected CatalogService $catalogService)
-    {
+    public function __construct(
+        protected CatalogService $catalogService,
+        protected ReviewService $reviewService,
+    ) {
     }
 
     public function categories(Request $request): View
@@ -32,10 +36,14 @@ class CatalogWebController extends Controller
     public function show(string $id): View
     {
         $product = $this->catalogService->productDetail($id);
+        $userReview = Auth::check()
+            ? $this->reviewService->findForUserProduct(Auth::user(), $id)
+            : null;
 
         return view('products.show', [
             'product' => $product,
             'productId' => $id,
+            'userReview' => $userReview,
         ]);
     }
 

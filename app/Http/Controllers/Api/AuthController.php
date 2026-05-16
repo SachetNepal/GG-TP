@@ -21,10 +21,10 @@ class AuthController extends Controller
         $result = $this->authService->registerCustomer($request->validated());
 
         return response()->json([
-            'message' => 'Customer registration successful',
+            'message' => 'Customer registration successful. Check your email for a 6-digit verification code.',
             'user_id' => $result['user']->user_id,
             'customer_id' => $result['customer']->customer_id,
-            'verification_token' => $result['verification']->verification_token,
+            'email' => $result['user']->email,
         ], 201);
     }
 
@@ -43,6 +43,17 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
+        $email = strtolower(trim($request->validated('email')));
+        $candidate = \App\Models\User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
+
+        if ($candidate
+            && $this->authService->passwordMatches($request->validated('password'), (string) $candidate->password)
+            && $this->authService->userNeedsEmailVerification($candidate)) {
+            return response()->json([
+                'message' => 'Please verify your email before logging in.',
+            ], 403);
+        }
+
         $user = $this->authService->login($request->validated());
 
         return response()->json([

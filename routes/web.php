@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\CatalogWebController;
 use App\Http\Controllers\Web\CheckoutWebController;
 use App\Http\Controllers\Web\OrderWebController;
 use App\Http\Controllers\Web\ProfileWebController;
+use App\Http\Controllers\Web\ReviewWebController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +28,9 @@ Route::get('/register-type', function () {
 })->name('register-type');
 Route::get('/register', [AuthWebController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthWebController::class, 'register']);
+Route::get('/verify-email', [AuthWebController::class, 'showVerifyEmail'])->name('verify-email');
+Route::post('/verify-email', [AuthWebController::class, 'verifyEmail'])->name('verify-email.submit');
+Route::post('/verify-email/resend', [AuthWebController::class, 'resendVerification'])->name('verify-email.resend');
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::get('/categories', [CatalogWebController::class, 'categories'])->name('categories');
@@ -46,6 +50,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/checkout', [CheckoutWebController::class, 'checkout'])->name('checkout');
     Route::get('/profile', [ProfileWebController::class, 'index'])->name('profile.index');
     Route::get('/orders', [OrderWebController::class, 'index'])->name('orders.index');
+    Route::post('/products/{id}/reviews', [ReviewWebController::class, 'store'])->name('products.reviews.store');
 });
 
 Route::redirect('/trader-portal', '/GG-TP/trader-portal/login.php', 302);

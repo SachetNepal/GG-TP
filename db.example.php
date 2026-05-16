@@ -1,9 +1,10 @@
 <?php
 /**
- * Copy to db.local.php and set your Oracle credentials (db.local.php is gitignored).
+ * Optional override — copy to db.local.php only if this machine needs different Oracle settings.
+ * Default credentials live in db.php (committed).
  */
 return [
-    'username' => 'your_username',
-    'password' => 'your_password',
-    'connection_string' => 'host:1521/SERVICE_NAME',
+    'username' => 'NEPSA',
+    'password' => 'Nepsa@12345',
+    'connection_string' => '192.168.1.64:1521/XEPDB1',
 ];

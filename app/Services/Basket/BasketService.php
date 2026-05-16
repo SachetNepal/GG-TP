@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\User;
 use App\Support\OracleId;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class BasketService
@@ -16,17 +17,33 @@ class BasketService
     {
         $customer = $this->resolveCustomer($user);
 
-        $basket = Basket::query()->where('customer_id', $customer->customer_id)->first();
+        $basket = Basket::query()
+            ->where('customer_id', $customer->customer_id)
+            ->first();
 
         if ($basket) {
-            return $basket;
+            return $basket->load('items.product');
         }
 
-        return Basket::query()->create([
-            'basket_id' => OracleId::next('BASKET', 'basket_id', 'BA'),
-            'customer_id' => $customer->customer_id,
-            'created_date' => now(),
-        ]);
+        try {
+            return Basket::query()->create([
+                'basket_id' => OracleId::next('BASKET', 'basket_id', 'BA'),
+                'customer_id' => $customer->customer_id,
+                'created_date' => now(),
+            ]);
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'ORA-00001')) {
+                $existing = Basket::query()
+                    ->where('customer_id', $customer->customer_id)
+                    ->first();
+
+                if ($existing) {
+                    return $existing->load('items.product');
+                }
+            }
+
+            throw $e;
+        }
     }
 
     public function addItem(User $user, string $productId): Basket

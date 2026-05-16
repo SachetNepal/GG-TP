@@ -25,6 +25,8 @@ class User extends Authenticatable
         'phone_num',
         'address',
         'created_at',
+        'email_verified',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -35,6 +37,8 @@ class User extends Authenticatable
     {
         return [
             'created_at' => 'datetime',
+            'email_verified_at' => 'datetime',
+            'email_verified' => 'boolean',
         ];
     }
 

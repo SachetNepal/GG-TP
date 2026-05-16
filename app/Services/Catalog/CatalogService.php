@@ -28,7 +28,14 @@ class CatalogService
     public function productDetail(string $productId): Product
     {
         return Product::query()
-            ->with(['shop.trader.user', 'category', 'reviews.customer.user', 'discounts'])
+            ->withAvg('reviews', 'rating')
+            ->with([
+                'shop.trader.user',
+                'category',
+                'discounts',
+                'reviews' => fn ($q) => $q->orderByDesc('review_date'),
+                'reviews.customer.user',
+            ])
             ->findOrFail($productId);
     }
 

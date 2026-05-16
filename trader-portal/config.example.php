@@ -1,7 +1,7 @@
 <?php
 /**
- * Copy this file to `config.php` and set your Oracle credentials.
- * Do not commit config.php (add to .gitignore).
+ * Template — committed config.php is used by default on all machines.
+ * Copy here only if you need a local override.
  */
 
 declare(strict_types=1);

@@ -26,7 +26,11 @@ class CartWebController extends Controller
             $basket = $this->basketService->getBasket(Auth::user());
             $summary = $this->basketService->summary($basket);
         } catch (Throwable $e) {
-            return redirect()->route('login')->with('status', $e->getMessage());
+            report($e);
+
+            return redirect()->route('home')->withErrors([
+                'cart' => 'Could not load your basket. Please try again.',
+            ]);
         }
 
         return view('cart.index', [

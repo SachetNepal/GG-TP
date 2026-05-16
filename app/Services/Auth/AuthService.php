@@ -15,6 +15,11 @@ use Illuminate\Support\Str;
 
 class AuthService
 {
+    public function __construct(
+        protected EmailVerificationService $emailVerificationService,
+    ) {
+    }
+
     public function registerCustomer(array $data): array
     {
         return DB::connection('oracle')->transaction(function () use ($data) {
@@ -28,10 +33,11 @@ class AuthService
                 'phone_num' => $data['phone_num'],
                 'address' => $data['address'],
                 'created_at' => now(),
+                'email_verified' => false,
             ]);
 
             $customer = Customer::create(['customer_id' => $userId]);
-            $verification = $this->createVerification($user->user_id);
+            $verification = $this->emailVerificationService->sendSignupCode($user);
 
             return compact('user', 'customer', 'verification');
         });
@@ -50,6 +56,7 @@ class AuthService
                 'phone_num' => $data['phone_num'],
                 'address' => $data['address'],
                 'created_at' => now(),
+                'email_verified' => false,
             ]);
 
             $trader = Trader::create([
@@ -61,7 +68,7 @@ class AuthService
                 'location' => $data['location'],
                 'trader_id' => $userId,
             ]);
-            $verification = $this->createVerification($user->user_id);
+            $verification = $this->emailVerificationService->sendSignupCode($user);
 
             return compact('user', 'trader', 'shop', 'verification');
         });
@@ -69,7 +76,7 @@ class AuthService
 
     public function login(array $credentials, bool $remember = false): User
     {
-        $user = $this->attemptLogin($credentials, $remember);
+        $user = $this->attemptLogin($credentials, $remember, allowUnverified: false);
         if (!$user) {
             abort(401, 'Invalid credentials');
         }
@@ -77,7 +84,7 @@ class AuthService
         return $user;
     }
 
-    public function attemptLogin(array $credentials, bool $remember = false): ?User
+    public function attemptLogin(array $credentials, bool $remember = false, bool $allowUnverified = false): ?User
     {
         $email = strtolower(trim((string) ($credentials['email'] ?? '')));
         $password = (string) ($credentials['password'] ?? '');
@@ -90,9 +97,18 @@ class AuthService
             return null;
         }
 
+        if (!$allowUnverified && ! $this->emailVerificationService->isUserEmailVerified($user)) {
+            return null;
+        }
+
         Auth::login($user, $remember);
 
         return $user;
+    }
+
+    public function userNeedsEmailVerification(?User $user): bool
+    {
+        return $user !== null && ! $this->emailVerificationService->isUserEmailVerified($user);
     }
 
     /** Supports bcrypt hashes and legacy plain-text passwords in Oracle. */
@@ -137,20 +153,16 @@ class AuthService
         }
 
         $verification->is_verified = true;
+        $verification->status = EmailVerificationService::STATUS_USED;
         $verification->save();
+
+        $user = User::query()->find($verification->user_id);
+        if ($user) {
+            $user->email_verified = true;
+            $user->email_verified_at = now();
+            $user->save();
+        }
 
         return $verification;
     }
-
-    protected function createVerification(string|int $userId): Verification
-    {
-        return Verification::create([
-            'verification_token' => Str::uuid()->toString(),
-            'created_at' => now(),
-            'expires_at' => now()->addHours(24),
-            'is_verified' => false,
-            'user_id' => $userId,
-        ]);
-    }
 }
-

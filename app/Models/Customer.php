@@ -21,7 +21,7 @@ class Customer extends BaseOracleModel
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'customer_id');
+        return $this->belongsTo(User::class, 'customer_id', 'user_id');
     }
 
     public function basket(): HasOne
