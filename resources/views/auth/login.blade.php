@@ -10,7 +10,7 @@
                 {{-- 1. Center Card Layout --}}
                 <header class="auth-header">
                     <h1>Login</h1>
-                    <p>Welcome back to GroceryGo.</p>
+                    <p>{{ !empty($checkoutAfterLogin) ? 'Sign in to continue to checkout.' : 'Welcome back to GroceryGo.' }}</p>
                 </header>
 
                 @if (session('status'))
@@ -19,8 +19,11 @@
                 @if ($errors->any())
                     <p class="alert alert-error" style="margin-bottom:12px;">{{ $errors->first() }}</p>
                 @endif
-                <form class="auth-form" method="post" action="{{ route('login') }}">
+                <form class="auth-form" method="post" action="{{ route('login', !empty($checkoutAfterLogin) ? ['checkout' => 1] : []) }}">
                     @csrf
+                    @if (!empty($checkoutAfterLogin))
+                        <input type="hidden" name="checkout" value="1">
+                    @endif
                     <div class="field-group">
                         <label for="loginEmail">Email</label>
                         <input id="loginEmail" name="email" type="email" value="{{ old('email') }}" placeholder="you@example.com" required>

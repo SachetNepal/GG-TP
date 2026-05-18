@@ -19,11 +19,11 @@
         </div>
 
         <div>
-            <h3>Privacy</h3>
+            <h3>Legal</h3>
             <ul class="footer-links">
-                <li><a href="{{ route('about') }}">Privacy Policy</a></li>
-                <li><a href="{{ route('about') }}">Terms and Conditions</a></li>
-                <li><a href="{{ route('about') }}">Cookie notice</a></li>
+                <li><a href="{{ route('legal.terms') }}">Terms and Conditions</a></li>
+                <li><a href="{{ route('legal.privacy') }}">Privacy Policy</a></li>
+                <li><a href="{{ route('legal.cookies') }}">Cookie Notice</a></li>
             </ul>
         </div>
 
@@ -45,6 +45,13 @@
         </div>
     </div>
     <div class="copyright">
-        <p>&copy; 2026 GroceryGo. All rights reserved.</p>
+        <p>&copy; GroceryGO</p>
+        <p class="footer-legal-links">
+            <a href="{{ route('legal.terms') }}">Terms and Conditions</a>
+            <span aria-hidden="true">|</span>
+            <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
+            <span aria-hidden="true">|</span>
+            <a href="{{ route('legal.cookies') }}">Cookie Notice</a>
+        </p>
     </div>
 </footer>

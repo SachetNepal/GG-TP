@@ -8,15 +8,19 @@
     $stock = $product['stock'] ?? ['label' => 'In Stock', 'variant' => 'in'];
     $stockLabel = $stock['label'] ?? 'In Stock';
     $stockVariant = $stock['variant'] ?? 'in';
+    $imageUrl = $product['image'] ?? null;
+    $imageIsPlaceholder = !empty($product['image_placeholder']);
 @endphp
 
-{{-- Shared product card (used in Categories + You May Like) --}}
-<article class="card product-card">
-    <a href="{{ route('products.show', $id) }}" class="product-card-link" aria-label="View {{ $name }}">
+{{-- Shared product card (used in Categories + You May Like) — entire card links to product page --}}
+<a href="{{ route('products.show', $id) }}" class="card product-card card-clickable" aria-label="View {{ $name }}">
+    @if (!empty($imageUrl))
+        <img src="{{ $imageUrl }}" alt="" class="product-card-image{{ $imageIsPlaceholder ? ' product-card-image--placeholder' : '' }}">
+    @else
         <div class="product-image-placeholder" aria-hidden="true">
             <span class="product-image-placeholder-text">Image</span>
         </div>
-    </a>
+    @endif
 
     <div class="product-meta">
         <span class="product-meta-pill">{{ $trader }}</span>
@@ -34,5 +38,4 @@
         </div>
         @include('partials.status-badge', ['label' => $stockLabel, 'variant' => $stockVariant])
     </div>
-</article>
-
+</a>

@@ -7,10 +7,13 @@ use App\Http\Controllers\Web\CheckoutWebController;
 use App\Http\Controllers\Web\OrderWebController;
 use App\Http\Controllers\Web\ProfileWebController;
 use App\Http\Controllers\Web\ReviewWebController;
+use App\Services\Catalog\CatalogService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home');
+Route::get('/', function (CatalogService $catalogService) {
+    return view('home', [
+        'homeCategoryCards' => $catalogService->homeCategoryCards(),
+    ]);
 })->name('home');
 
 Route::get('/contact', function () {
@@ -20,6 +23,10 @@ Route::get('/contact', function () {
 Route::get('/about', function () {
     return view('about');
 })->name('about');
+
+Route::view('/terms-and-conditions', 'legal.terms')->name('legal.terms');
+Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+Route::view('/cookie-notice', 'legal.cookies')->name('legal.cookies');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login']);
@@ -60,6 +67,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/orders/{orderId}', [OrderWebController::class, 'show'])->name('orders.show');
     Route::post('/orders/{orderId}/cancel', [OrderWebController::class, 'cancel'])->name('orders.cancel');
     Route::post('/products/{id}/reviews', [ReviewWebController::class, 'store'])->name('products.reviews.store');
+    Route::post('/reviews/{reviewId}/comments', [ReviewWebController::class, 'storeComment'])->name('reviews.comments.store');
 });
 
 Route::redirect('/trader-portal', '/GG-TP/trader-portal/login.php', 302);

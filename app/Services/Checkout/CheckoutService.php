@@ -5,6 +5,7 @@ namespace App\Services\Checkout;
 use App\Models\CollectionSlot;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\Basket\BasketService;
 use App\Support\OracleId;
@@ -32,6 +33,18 @@ class CheckoutService
         $this->slotCapacityService->assertSlotAvailable($payload['slot_date'], $payload['slot_time']);
 
         return DB::connection('oracle')->transaction(function () use ($user, $basket, $summary, $payload) {
+            foreach ($summary['items'] as $line) {
+                $product = Product::query()
+                    ->where('product_id', $line['product_id'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$product || (int) $product->product_in_stock < (int) $line['quantity']) {
+                    $name = $product->product_name ?? $line['product_id'];
+                    abort(422, "Not enough stock for {$name}.");
+                }
+            }
+
             $orderId = OracleId::next('ORDERS', 'order_id', 'O');
 
             $order = Order::create([
@@ -50,6 +63,15 @@ class CheckoutService
                     'order_id' => $order->order_id,
                     'product_id' => $line['product_id'],
                 ]);
+
+                $decremented = Product::query()
+                    ->where('product_id', $line['product_id'])
+                    ->where('product_in_stock', '>=', (int) $line['quantity'])
+                    ->decrement('product_in_stock', (int) $line['quantity']);
+
+                if (!$decremented) {
+                    abort(422, 'Stock changed while checkout was processing. Please review your basket.');
+                }
             }
 
             $pickupDate = $this->slotCapacityService->resolvePickupDate($payload['slot_date']);

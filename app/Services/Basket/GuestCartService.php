@@ -38,7 +38,10 @@ class GuestCartService
             return;
         }
 
-        Product::query()->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
+        if ($quantity > (int) $product->product_in_stock) {
+            abort(422, 'Not enough stock available for this product.');
+        }
         $cart[$productId] = min(20, $quantity);
         Session::put(self::SESSION_KEY, $cart);
     }

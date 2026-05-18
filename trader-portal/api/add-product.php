@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
+require_once dirname(__DIR__) . '/includes/product-images.php';
+require_once dirname(__DIR__) . '/includes/product-pricing.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -28,7 +30,7 @@ $shopId = trader_shop_id($me);
 $name = trim((string) ($_POST['product_name'] ?? ''));
 $desc = trim((string) ($_POST['description'] ?? ''));
 $categoryId = trim((string) ($_POST['category_id'] ?? ''));
-$price = (float) str_replace(',', '.', (string) ($_POST['price'] ?? '0'));
+$price = round((float) str_replace(',', '.', (string) ($_POST['price'] ?? '0')), 2);
 $stock = (int) ($_POST['stock'] ?? 0);
 $unit = trim((string) ($_POST['unit'] ?? ''));
 $maxOrder = (int) ($_POST['max_per_order'] ?? 1);
@@ -37,8 +39,13 @@ $availability = trim((string) ($_POST['availability'] ?? 'both'));
 $tags = trim((string) ($_POST['tags'] ?? '')); // comma-separated from pills
 $subcat = trim((string) ($_POST['subcategory'] ?? ''));
 
-if ($name === '' || $categoryId === '' || $price <= 0) {
-    json_response(['ok' => false, 'error' => 'Validation: name, category and price are required.'], 422);
+if ($name === '' || $categoryId === '') {
+    json_response(['ok' => false, 'error' => 'Validation: name and category are required.'], 422);
+}
+
+$pricingError = null;
+if (! product_validate_pricing_stock($price, $stock, $maxOrder, $pricingError)) {
+    json_response(['ok' => false, 'error' => $pricingError], 422);
 }
 
 // Embed meta in description so core ERD stays unchanged without ALTER.
@@ -85,40 +92,18 @@ try {
 
     $newId = $newPid;
 
-    // Images
-    $uploadDir = dirname(__DIR__) . '/assets/uploads/products/' . $shopId;
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0775, true);
-    }
-
     if (!empty($_FILES['images'])) {
-        $files = $_FILES['images'];
-        $names = [];
-        if (is_array($files['name'])) {
-            foreach ($files['name'] as $i => $fname) {
-                if (($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                    continue;
-                }
-                $tmp = $files['tmp_name'][$i];
-                $mime = 'application/octet-stream';
-                if (class_exists('finfo')) {
-                    $fi = new finfo(FILEINFO_MIME_TYPE);
-                    $mime = $fi->file($tmp) ?: $mime;
-                }
-                if (!in_array($mime, ALLOWED_IMAGE_MIME, true)) {
-                    continue;
-                }
-                $safe = safe_filename($fname);
-                $target = $uploadDir . '/' . $newId . '_' . $safe;
-                if (move_uploaded_file($tmp, $target)) {
-                    $names[] = basename($target);
-                }
-            }
-        }
+        $names = product_process_image_uploads($shopId, $newId, $_FILES['images']);
         if ($names !== []) {
-            $note = '|IMG:' . implode(',', $names);
-            $upd = 'UPDATE product SET description = description || :note WHERE product_id = :pid AND shop_id = :sid';
-            $st2 = db_execute($upd, ['note' => $note, 'pid' => $newId, 'sid' => $shopId]);
+            $fullDesc = product_set_images_on_description(
+                product_display_description($fullDesc),
+                $fullDesc,
+                $names
+            );
+            $st2 = db_execute(
+                'UPDATE product SET description = :d WHERE product_id = :pid AND shop_id = :sid',
+                ['d' => $fullDesc, 'pid' => $newId, 'sid' => $shopId]
+            );
             if ($st2) {
                 oci_free_statement($st2);
             }

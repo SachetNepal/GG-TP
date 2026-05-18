@@ -79,11 +79,15 @@
                     @forelse($products as $p)
                         @php
                             $stock = (int) ($p->product_in_stock ?? 0);
+                            $uploadedImage = \App\Support\ProductMeta::primaryImageUrl($p->shop_id, $p->description);
+                            $displayImage = $p->customerPrimaryImageUrl();
                             $product = [
                                 'id' => $p->product_id,
                                 'trader' => $p->shop->shop_name ?? 'Shop',
                                 'category' => $p->category->category_name ?? '',
                                 'name' => $p->product_name,
+                                'image' => $displayImage,
+                                'image_placeholder' => $uploadedImage === null && $displayImage !== null,
                                 'price' => (float) $p->price,
                                 'stock' => [
                                     'label' => $stock <= 0 ? 'Out of Stock' : ($stock <= 5 ? 'Low Stock' : 'In Stock'),

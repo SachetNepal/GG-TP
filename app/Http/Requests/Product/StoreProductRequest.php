@@ -18,8 +18,8 @@ class StoreProductRequest extends FormRequest
             'category_id' => ['required', 'string', 'max:20'],
             'product_name' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'product_in_stock' => ['required', 'integer', 'min:0'],
+            'price' => ['required', 'numeric', 'min:0.01', 'max:9999.99'],
+            'product_in_stock' => ['required', 'integer', 'min:0', 'max:9999'],
         ];
     }
 }

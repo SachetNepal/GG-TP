@@ -29,7 +29,7 @@ class CheckoutWebController extends Controller
     public function showSlotPicker(Request $request): View|RedirectResponse
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login', ['checkout' => 1]);
         }
 
         $summary = $this->basketService->summary($this->basketService->getBasket(Auth::user()));

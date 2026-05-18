@@ -77,7 +77,8 @@ require_once dirname(__DIR__) . '/includes/header.php';
             <div class="form-grid cols-2">
                 <div>
                     <label for="price">Price (USD $)</label>
-                    <input class="input" type="number" step="0.01" min="0" id="price" name="price" required>
+                    <input class="input" type="number" step="0.01" min="0.01" max="9999.99" id="price" name="price" required placeholder="e.g. 5.50">
+                    <p class="muted small field-hint">Max $9,999.99</p>
                 </div>
                 <div>
                     <label for="unit">Unit / weight</label>
@@ -85,24 +86,34 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 </div>
                 <div>
                     <label for="stock">Stock available</label>
-                    <input class="input" type="number" min="0" id="stock" name="stock" value="0">
+                    <input class="input" type="number" min="0" max="9999" step="1" id="stock" name="stock" value="0">
+                    <p class="muted small field-hint">0–9,999 units</p>
                 </div>
                 <div>
                     <label for="max_per_order">Max per order</label>
-                    <input class="input" type="number" min="1" id="max_per_order" name="max_per_order" value="10">
+                    <input class="input" type="number" min="1" max="20" step="1" id="max_per_order" name="max_per_order" value="10">
+                    <p class="muted small field-hint">1–20 per customer order</p>
                 </div>
             </div>
         </section>
 
         <section class="dash-panel">
             <h2 class="panel-title">Dietary &amp; tags</h2>
-            <div class="pill-row">
+            <p class="muted small tags-help">Click a tag to select or deselect it. Selected tags are highlighted in green.</p>
+            <div class="pill-row" id="tagPillRow" role="group" aria-label="Product tags">
                 <?php
                 $tags = ['Free Range', 'Grass Fed', 'Locally Sourced', 'Gluten Free', 'Halal', 'Special Offer'];
                 foreach ($tags as $t):
                 ?>
-                    <button type="button" class="pill-btn" data-tag="<?= h($t) ?>"><?= h($t) ?></button>
+                    <button type="button" class="pill-btn" data-tag="<?= h($t) ?>" aria-pressed="false"><?= h($t) ?></button>
                 <?php endforeach; ?>
+            </div>
+            <div class="tag-custom-add-row">
+                <label for="customTagInput">Add your own tag</label>
+                <div class="tag-custom-add">
+                    <input type="text" id="customTagInput" class="input" maxlength="40" placeholder="e.g. Organic, Vegan">
+                    <button type="button" class="btn btn-outline" id="addCustomTagBtn">Add tag</button>
+                </div>
             </div>
         </section>
 

@@ -587,6 +587,62 @@
   color: var(--primary-green-dark);
 }
 
+.pill-btn.selected,
+.pill-btn[aria-pressed="true"] {
+  background: var(--primary-green);
+  border-color: var(--primary-green-dark);
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(31, 122, 77, 0.2);
+}
+
+.pill-btn.selected:hover,
+.pill-btn[aria-pressed="true"]:hover {
+  background: var(--primary-green-dark);
+  border-color: var(--primary-green-dark);
+  color: #fff;
+}
+
+.pill-btn--custom {
+  border-style: dashed;
+}
+
+.pill-btn--custom.selected,
+.pill-btn--custom[aria-pressed="true"] {
+  border-style: solid;
+}
+
+.tags-help {
+  margin: 0 0 12px;
+}
+
+.tag-custom-add-row {
+  margin-top: 16px;
+}
+
+.tag-custom-add-row label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-green-dark);
+  margin-bottom: 8px;
+}
+
+.tag-custom-add {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.tag-custom-add .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.tag-custom-add .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* Legacy Oracle portal form controls (field layout uses .form-grid + .input) */
 .trader-page-wrap .input,
 .trader-page-wrap select.input,
@@ -650,6 +706,25 @@
 
 .nav-primary--trader a:hover {
   color: var(--accent-orange);
+}
+
+.nav-primary--trader a {
+  position: relative;
+}
+
+.nav-primary--trader a.active {
+  color: var(--accent-orange);
+}
+
+.nav-primary--trader a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--accent-orange);
 }
 
 .layout-app .main-nav {
@@ -735,6 +810,64 @@
   color: var(--text-primary);
   font-size: 15px;
   line-height: 1.55;
+}
+
+.trader-review-comments {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.trader-review-comments li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fffef5;
+  border: 1px solid var(--border-color);
+}
+
+.trader-review-comments li p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.trader-review-shop-reply {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #e8f6ee;
+  border: 1px solid #c5e6d4;
+}
+
+.trader-review-reply-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary-green-dark);
+  margin: 0 0 6px;
+}
+
+.trader-review-reply-form {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.trader-review-reply-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-green-dark);
+}
+
+.trader-review-reply-form textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
 }
 
 /* =========================
@@ -1004,6 +1137,69 @@
   min-width: 120px;
 }
 
+.report-range-panel {
+  margin-bottom: 20px;
+}
+
+.report-range-hint {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--text-muted, #6b7280);
+}
+
+.report-range-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.report-range-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-range-field--active .report-range-label {
+  color: var(--brand, #166534);
+  font-weight: 600;
+}
+
+.report-range-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #6b7280);
+}
+
+.report-range-actions {
+  margin-bottom: 20px;
+}
+
+.report-download-row {
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.report-download-label {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted, #6b7280);
+}
+
+.report-download-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-download-btns .btn-sm {
+  padding: 8px 14px;
+  font-size: 0.875rem;
+}
+
 .dash-form .input,
 .dash-form select.input,
 .dash-form textarea.input {
@@ -1120,6 +1316,19 @@
 
 .trader-dashboard .form-actions-top.dash-panel {
   margin-bottom: 0;
+}
+
+.shop-logo-preview-wrap {
+  margin: 0 0 12px;
+}
+
+.shop-logo-preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: block;
 }
 
 .trader-dashboard .wf-section-title,

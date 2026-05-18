@@ -55,7 +55,7 @@
         </div>
     </section>
 
-    {{-- 3. TEAM SECTION: five placeholders; icon ring colors alternate green / orange / green / orange / green --}}
+    {{-- 3. TEAM SECTION --}}
     <section class="section section-light" id="team">
         <div class="container">
             <article class="card about-team-card">
@@ -71,7 +71,7 @@
                                 <path d="M24 88c4-22 16-30 24-30s20 8 24 30" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
                             </svg>
                         </div>
-                        <p class="team-label">Team Member 1</p>
+                        <p class="team-label">Anushka Thapa</p>
                     </div>
                     <div class="team-member">
                         <div class="team-avatar team-avatar--orange" aria-hidden="true">
@@ -80,7 +80,7 @@
                                 <path d="M24 88c4-22 16-30 24-30s20 8 24 30" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
                             </svg>
                         </div>
-                        <p class="team-label">Team Member 2</p>
+                        <p class="team-label">Srijan Thapa</p>
                     </div>
                     <div class="team-member">
                         <div class="team-avatar team-avatar--green" aria-hidden="true">
@@ -89,7 +89,7 @@
                                 <path d="M24 88c4-22 16-30 24-30s20 8 24 30" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
                             </svg>
                         </div>
-                        <p class="team-label">Team Member 3</p>
+                        <p class="team-label">Sujan Tamrakar</p>
                     </div>
                     <div class="team-member">
                         <div class="team-avatar team-avatar--orange" aria-hidden="true">
@@ -98,7 +98,7 @@
                                 <path d="M24 88c4-22 16-30 24-30s20 8 24 30" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
                             </svg>
                         </div>
-                        <p class="team-label">Team Member 4</p>
+                        <p class="team-label">Saksham Kishore Kshatri</p>
                     </div>
                     <div class="team-member">
                         <div class="team-avatar team-avatar--green" aria-hidden="true">
@@ -107,7 +107,7 @@
                                 <path d="M24 88c4-22 16-30 24-30s20 8 24 30" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
                             </svg>
                         </div>
-                        <p class="team-label">Team Member 5</p>
+                        <p class="team-label">Sachet Nepal</p>
                     </div>
                 </div>
             </article>

@@ -7,11 +7,37 @@
 
     <section class="section">
         <div class="container product-details-layout">
+            <div class="product-details-aside">
             <article class="card product-details-media">
-                <div class="product-image-large" aria-hidden="true">
-                    <span>Product Image</span>
-                </div>
+                @php
+                    $galleryUrls = $product->customerGalleryUrls();
+                    $isPlaceholder = $product->customerUsesPlaceholderImage();
+                @endphp
+                @if ($galleryUrls !== [])
+                    <div class="product-gallery" data-product-gallery>
+                        <div class="product-gallery-main">
+                            <img id="productGalleryMain" src="{{ $galleryUrls[0] }}" alt="{{ $product->product_name }}" class="product-image-large product-image-large--photo{{ $isPlaceholder ? ' product-card-image--placeholder' : '' }}">
+                        </div>
+                        @if (count($galleryUrls) > 1)
+                            <div class="product-gallery-thumbs" role="list" aria-label="Product images">
+                                @foreach ($galleryUrls as $index => $url)
+                                    <button type="button" class="product-gallery-thumb{{ $index === 0 ? ' is-active' : '' }}" data-gallery-src="{{ $url }}" role="listitem" aria-label="View image {{ $index + 1 }} of {{ count($galleryUrls) }}" aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
+                                        <img src="{{ $url }}" alt="">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <div class="product-image-large" aria-hidden="true">
+                        <span>Product Image</span>
+                    </div>
+                @endif
             </article>
+
+            @include('partials.you-may-like-carousel', ['similarProducts' => $similarProducts])
+
+            </div>
 
             <article class="product-details-panel">
                 @php
@@ -45,7 +71,7 @@
 
                 <div class="product-details-description">
                     <h3>Description</h3>
-                    <p class="text-secondary">{{ $product->description }}</p>
+                    <p class="text-secondary">{{ $product->customerDescription() }}</p>
                 </div>
 
                 @if (session('status'))
@@ -67,19 +93,15 @@
                     </p>
                 @endguest
 
-                <section class="reviews-section">
-                    <h3 class="reviews-section-title">Reviews</h3>
+                <section class="reviews-section" aria-labelledby="reviews-section-title">
+                    <h3 id="reviews-section-title" class="reviews-section-title">Reviews</h3>
 
                     @auth
-                        @if ($userReview)
-                            <p class="review-note">
-                                You rated this product
-                                <span class="stars-gold" aria-label="{{ $userReview->rating }} out of 5">{{ str_repeat('★', (int) $userReview->rating) }}{{ str_repeat('☆', 5 - (int) $userReview->rating) }}</span>
-                            </p>
-                        @elseif (auth()->user()->customer)
+                        @if ($canReview)
                             <form method="post" action="{{ route('products.reviews.store', $product->product_id) }}" class="card review-form">
                                 @csrf
-                                <p class="review-form-label">Your rating</p>
+                                <p class="review-form-label">Write a review</p>
+                                <p class="review-note">You can post multiple reviews after you have purchased this product.</p>
                                 <div class="star-rating" role="radiogroup" aria-label="Your rating">
                                     @for ($i = 5; $i >= 1; $i--)
                                         <input
@@ -114,6 +136,8 @@
 
                                 <button type="submit" class="btn btn-primary">Submit review</button>
                             </form>
+                        @elseif (auth()->user()->customer)
+                            <p class="text-secondary review-note">Purchase this product once to leave a review and comment on others.</p>
                         @else
                             <p class="text-secondary review-note">Customer accounts can leave reviews after signing in.</p>
                         @endif
@@ -124,23 +148,109 @@
                     @if ($product->reviews->isNotEmpty())
                         <div class="reviews-grid">
                             @foreach ($product->reviews as $review)
-                                <article class="card review-card">
+                                <article class="card review-card" id="review-{{ $review->review_id }}">
                                     <div class="review-head">
                                         <strong>{{ trim(($review->customer->user->first_name ?? '').' '.($review->customer->user->last_name ?? '')) ?: 'Customer' }}</strong>
                                         <span class="stars-gold" aria-label="{{ $review->rating }} out of 5">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</span>
                                     </div>
-                                    <p class="text-secondary">{{ $review->review_body }}</p>
+                                    <p class="review-body-text">{{ $review->review_body }}</p>
                                     @if ($review->review_date)
                                         <time class="review-date text-secondary" datetime="{{ $review->review_date->toDateString() }}">{{ $review->review_date->format('j M Y') }}</time>
                                     @endif
+
+                                    @if (!empty($review->trader_reply))
+                                        <div class="review-trader-reply">
+                                            <p class="review-reply-label">Shop reply</p>
+                                            <p>{{ $review->trader_reply }}</p>
+                                            @if ($review->trader_reply_date)
+                                                <time class="review-date text-secondary" datetime="{{ $review->trader_reply_date->toDateString() }}">{{ $review->trader_reply_date->format('j M Y') }}</time>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    @if ($review->comments->isNotEmpty())
+                                        <ul class="review-comments">
+                                            @foreach ($review->comments as $comment)
+                                                <li class="review-comment">
+                                                    <strong>{{ trim(($comment->customer->user->first_name ?? '').' '.($comment->customer->user->last_name ?? '')) ?: 'Customer' }}</strong>
+                                                    <p>{{ $comment->comment_body }}</p>
+                                                    @if ($comment->comment_date)
+                                                        <time class="review-date text-secondary" datetime="{{ $comment->comment_date->toDateString() }}">{{ $comment->comment_date->format('j M Y') }}</time>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @auth
+                                        @if ($canReview)
+                                            <form method="post" action="{{ route('reviews.comments.store', $review->review_id) }}" class="review-comment-form">
+                                                @csrf
+                                                <label for="comment-{{ $review->review_id }}" class="sr-only">Comment on this review</label>
+                                                <textarea id="comment-{{ $review->review_id }}" name="comment_body" rows="2" maxlength="500" required placeholder="Add a comment…"></textarea>
+                                                @error('comment')
+                                                    <p class="alert alert-error" style="margin-top:8px;">{{ $message }}</p>
+                                                @enderror
+                                                @error('comment_body')
+                                                    <p class="alert alert-error" style="margin-top:8px;">{{ $message }}</p>
+                                                @enderror
+                                                <button type="submit" class="btn btn-outline btn-sm">Post comment</button>
+                                            </form>
+                                        @endif
+                                    @endauth
                                 </article>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-secondary">No reviews yet. Be the first to share your thoughts.</p>
+                        <p class="text-secondary">No reviews yet. Be the first to share your thoughts after you purchase.</p>
                     @endif
                 </section>
             </article>
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('[data-product-gallery] .product-gallery-thumb').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var src = btn.getAttribute('data-gallery-src');
+                var main = document.getElementById('productGalleryMain');
+                if (!src || !main) return;
+                main.src = src;
+                document.querySelectorAll('[data-product-gallery] .product-gallery-thumb').forEach(function (b) {
+                    b.classList.remove('is-active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('is-active');
+                btn.setAttribute('aria-pressed', 'true');
+            });
+        });
+
+        document.querySelectorAll('[data-you-may-like-carousel]').forEach(function (root) {
+            var track = root.querySelector('[data-you-may-like-track]');
+            var prev = root.querySelector('.you-may-like-arrow--prev');
+            var next = root.querySelector('.you-may-like-arrow--next');
+            if (!track || !prev || !next) return;
+
+            function slideStep(direction) {
+                var slide = track.querySelector('.you-may-like-slide');
+                var gap = 10;
+                var amount = slide ? slide.offsetWidth + gap : track.clientWidth;
+                track.scrollBy({ left: direction * amount, behavior: 'smooth' });
+            }
+
+            function updateArrows() {
+                var maxScroll = track.scrollWidth - track.clientWidth - 2;
+                prev.disabled = track.scrollLeft <= 2;
+                next.disabled = track.scrollLeft >= maxScroll;
+            }
+
+            prev.addEventListener('click', function () { slideStep(-1); });
+            next.addEventListener('click', function () { slideStep(1); });
+            track.addEventListener('scroll', updateArrows, { passive: true });
+            window.addEventListener('resize', updateArrows);
+            updateArrows();
+        });
+    </script>
+@endpush

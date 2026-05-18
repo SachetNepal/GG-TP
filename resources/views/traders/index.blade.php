@@ -48,14 +48,19 @@
 
             <div class="traders-cards-grid">
                 @forelse($traders as $shop)
-                    <article class="card trader-list-card">
-                        <div class="trader-list-image" aria-hidden="true">
-                            <span>Shop</span>
+                    <a href="{{ route('categories', ['shop_id' => [$shop->shop_id]]) }}" class="card trader-list-card card-clickable" aria-label="View products from {{ $shop->shop_name }}">
+                        @php $shopLogo = ($shopLogos ?? collect())[$shop->shop_id] ?? null; @endphp
+                        <div class="trader-list-image{{ $shopLogo ? ' trader-list-image--photo' : '' }}" aria-hidden="true">
+                            @if ($shopLogo)
+                                <img src="{{ $shopLogo }}" alt="" class="trader-list-image-img">
+                            @else
+                                <span>Shop</span>
+                            @endif
                         </div>
                         <h3>{{ $shop->shop_name }}</h3>
                         <p>{{ $shop->location ?? 'Local trader' }}</p>
-                        <a href="{{ route('categories', ['shop_id' => $shop->shop_id]) }}" class="btn btn-outline" style="margin-top:12px;">View products</a>
-                    </article>
+                        <span class="btn btn-outline trader-list-card-cta">View products</span>
+                    </a>
                 @empty
                     <p class="muted">No shops listed yet.</p>
                 @endforelse

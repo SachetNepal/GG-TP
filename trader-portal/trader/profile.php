@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
+require_once dirname(__DIR__) . '/includes/shop-media.php';
 
 $me = require_trader();
 $uid = (string) $me['user_id'];
@@ -97,6 +98,12 @@ $flash = flash_get();
 
             <section id="photos" style="margin-bottom:24px;">
                 <label for="shop_logo">Shop logo</label>
+                <?php $currentLogo = $shopId !== '' ? shop_logo_public_url($shopId) : null; ?>
+                <?php if ($currentLogo): ?>
+                    <p class="shop-logo-preview-wrap">
+                        <img src="<?= h($currentLogo) ?>" alt="" class="shop-logo-preview">
+                    </p>
+                <?php endif; ?>
                 <input type="file" name="shop_logo" id="shop_logo" accept="image/*" class="input">
             </section>
 

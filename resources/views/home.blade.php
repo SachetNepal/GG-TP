@@ -56,36 +56,14 @@
                 <h2>Fresh From Five Local Shops</h2>
             </div>
             <div class="trader-grid">
-                <article class="card trader-card">
-                    <div class="trader-icon">
-                        <img src="{{ asset('assets/icons/butcher.png') }}" alt="Butcher icon" class="trader-icon-image">
-                    </div>
-                    <h3>Butcher</h3>
-                </article>
-                <article class="card trader-card">
-                    <div class="trader-icon">
-                        <img src="{{ asset('assets/icons/bakery.png') }}" alt="Bakery icon" class="trader-icon-image">
-                    </div>
-                    <h3>Bakery</h3>
-                </article>
-                <article class="card trader-card">
-                    <div class="trader-icon">
-                        <img src="{{ asset('assets/icons/greengrocer.png') }}" alt="Greengrocer icon" class="trader-icon-image">
-                    </div>
-                    <h3>Greengrocer</h3>
-                </article>
-                <article class="card trader-card">
-                    <div class="trader-icon">
-                        <img src="{{ asset('assets/icons/fishmonger.png') }}" alt="Fishmonger icon" class="trader-icon-image">
-                    </div>
-                    <h3>Fishmonger</h3>
-                </article>
-                <article class="card trader-card">
-                    <div class="trader-icon">
-                        <img src="{{ asset('assets/icons/delicatessen.png') }}" alt="Delicatessen icon" class="trader-icon-image">
-                    </div>
-                    <h3>Delicatessen</h3>
-                </article>
+                @foreach ($homeCategoryCards as $card)
+                    <a href="{{ $card['url'] }}" class="card trader-card card-clickable" aria-label="Shop {{ $card['label'] }}">
+                        <div class="trader-icon">
+                            <img src="{{ asset('assets/icons/' . $card['icon']) }}" alt="" class="trader-icon-image">
+                        </div>
+                        <h3>{{ $card['label'] }}</h3>
+                    </a>
+                @endforeach
             </div>
         </div>
     </section>

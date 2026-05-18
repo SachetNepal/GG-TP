@@ -15,7 +15,10 @@ use App\Services\Auth\EmailVerificationService;
 use App\Services\Auth\PasswordResetService;
 use App\Services\Basket\BasketService;
 use App\Services\Basket\GuestCartService;
+use App\Support\AppUrl;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use RuntimeException;
 
@@ -30,9 +33,15 @@ class AuthWebController extends Controller
     ) {
     }
 
-    public function showLogin(): View
+    public function showLogin(Request $request): View|RedirectResponse
     {
-        return view('auth.login');
+        if (Auth::check()) {
+            return $this->redirectAfterLogin($request);
+        }
+
+        return view('auth.login', [
+            'checkoutAfterLogin' => $request->boolean('checkout'),
+        ]);
     }
 
     public function login(LoginRequest $request): RedirectResponse
@@ -69,7 +78,27 @@ class AuthWebController extends Controller
             report($e);
         }
 
-        return redirect()->intended(route('home'));
+        return $this->redirectAfterLogin($request);
+    }
+
+    private function redirectAfterLogin(Request $request): RedirectResponse
+    {
+        $checkout = $request->boolean('checkout');
+
+        $intended = session()->pull('url.intended');
+        if (is_string($intended) && $intended !== '') {
+            if (str_contains($intended, '/checkout')) {
+                $checkout = true;
+            }
+            $fixed = AppUrl::fixApplicationUrl($intended);
+            if ($fixed !== null && $fixed !== '') {
+                return redirect()->to($fixed);
+            }
+        }
+
+        $default = $checkout ? route('checkout.collection-slot') : route('home');
+
+        return redirect()->to($default);
     }
 
     public function showRegister(): View|RedirectResponse

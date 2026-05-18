@@ -120,7 +120,7 @@
                         Checkout
                     </a>
                 @else
-                    <a class="btn btn-primary cart-checkout-btn" href="{{ route('checkout.collection-slot') }}">
+                    <a class="btn btn-primary cart-checkout-btn" href="{{ route('login', ['checkout' => 1]) }}">
                         Sign in to checkout
                     </a>
                     <p class="cart-note" style="margin-top:10px;">You will be asked to sign in before payment.</p>

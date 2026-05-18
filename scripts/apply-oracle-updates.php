@@ -37,6 +37,16 @@ function addColumn($conn, string $table, string $column, string $definition): vo
     echo "  added {$table}.{$column}\n";
 }
 
+function tableExists($conn, string $table): bool
+{
+    $row = $conn->selectOne(
+        'SELECT COUNT(*) AS cnt FROM user_tables WHERE table_name = ?',
+        [strtoupper($table)]
+    );
+
+    return (int) ($row->cnt ?? $row->CNT ?? 0) > 0;
+}
+
 echo "=== GroceryGo Oracle updates ===\n\n";
 
 echo "1) Email verification columns\n";
@@ -70,6 +80,26 @@ if (! $skipPrices) {
     echo "  (Re-run with --skip-prices to avoid converting again.)\n";
 } else {
     echo "\n3) Product prices skipped (--skip-prices)\n";
+}
+
+echo "\n4) Review comments and trader replies\n";
+addColumn($conn, 'REVIEW', 'TRADER_REPLY', 'VARCHAR2(1000)');
+addColumn($conn, 'REVIEW', 'TRADER_REPLY_DATE', 'DATE');
+
+if (! tableExists($conn, 'REVIEW_COMMENT')) {
+    $conn->statement(
+        'CREATE TABLE review_comment (
+            comment_id VARCHAR2(20) NOT NULL,
+            review_id VARCHAR2(20) NOT NULL,
+            comment_body VARCHAR2(1000) NOT NULL,
+            comment_date DATE DEFAULT SYSDATE NOT NULL,
+            customer_id VARCHAR2(20) NOT NULL,
+            CONSTRAINT pk_review_comment PRIMARY KEY (comment_id)
+        )'
+    );
+    echo "  created REVIEW_COMMENT table\n";
+} else {
+    echo "  skip REVIEW_COMMENT (already exists)\n";
 }
 
 $conn->statement('COMMIT');

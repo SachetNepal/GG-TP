@@ -11,6 +11,14 @@ $onRegisterPage = $authNavActive === 'register.php';
 $loginNavClass = $onRegisterPage ? 'btn btn-outline nav-login' : 'btn btn-signup nav-login';
 $registerNavClass = $onRegisterPage ? 'btn btn-signup nav-login' : 'btn btn-outline nav-login';
 
+$traderNavPage = basename($_SERVER['PHP_SELF'] ?? '');
+$traderNavActive = static function (string ...$pages) use ($traderNavPage): string {
+    return in_array($traderNavPage, $pages, true) ? 'active' : '';
+};
+$traderNavCurrent = static function (string ...$pages) use ($traderNavPage): string {
+    return in_array($traderNavPage, $pages, true) ? ' aria-current="page"' : '';
+};
+
 ?>
 <header class="site-header">
     <input type="checkbox" id="site-nav-toggle" class="site-nav-checkbox">
@@ -28,12 +36,12 @@ $registerNavClass = $onRegisterPage ? 'btn btn-signup nav-login' : 'btn btn-outl
         <nav class="main-nav" aria-label="Primary">
             <?php if ($isTrader): ?>
                 <div class="nav-primary nav-primary--trader">
-                    <a href="<?= h(portal_url('trader/dashboard.php')) ?>">Dashboard</a>
-                    <a href="<?= h(portal_url('trader/manage-products.php')) ?>">Products</a>
-                    <a href="<?= h(portal_url('trader/discounts.php')) ?>">Discounts</a>
-                    <a href="<?= h(portal_url('trader/orders.php')) ?>">Orders</a>
-                    <a href="<?= h(portal_url('trader/reports.php')) ?>">Reports</a>
-                    <a href="<?= h(portal_url('trader/profile.php')) ?>">Profile</a>
+                    <a href="<?= h(portal_url('trader/dashboard.php')) ?>" class="<?= h($traderNavActive('dashboard.php')) ?>"<?= $traderNavCurrent('dashboard.php') ?>>Dashboard</a>
+                    <a href="<?= h(portal_url('trader/manage-products.php')) ?>" class="<?= h($traderNavActive('manage-products.php', 'add-product.php', 'edit-product.php', 'product-reviews.php')) ?>"<?= $traderNavCurrent('manage-products.php', 'add-product.php', 'edit-product.php', 'product-reviews.php') ?>>Products</a>
+                    <a href="<?= h(portal_url('trader/discounts.php')) ?>" class="<?= h($traderNavActive('discounts.php')) ?>"<?= $traderNavCurrent('discounts.php') ?>>Discounts</a>
+                    <a href="<?= h(portal_url('trader/orders.php')) ?>" class="<?= h($traderNavActive('orders.php', 'order-details.php')) ?>"<?= $traderNavCurrent('orders.php', 'order-details.php') ?>>Orders</a>
+                    <a href="<?= h(portal_url('trader/reports.php')) ?>" class="<?= h($traderNavActive('reports.php')) ?>"<?= $traderNavCurrent('reports.php') ?>>Reports</a>
+                    <a href="<?= h(portal_url('trader/profile.php')) ?>" class="<?= h($traderNavActive('profile.php', 'settings.php')) ?>"<?= $traderNavCurrent('profile.php', 'settings.php') ?>>Profile</a>
                 </div>
                 <div class="nav-actions">
                     <a href="<?= h(portal_url('logout.php')) ?>" class="btn btn-signup nav-login">Logout</a>

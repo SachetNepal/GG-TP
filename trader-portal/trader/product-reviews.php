@@ -25,7 +25,55 @@ if (! $product) {
     portal_redirect('/trader/manage-products.php');
 }
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    if (! portal_verify_csrf()) {
+        flash_set('error', 'Session expired. Please try again.');
+        portal_redirect('/trader/product-reviews.php?id=' . rawurlencode($productId));
+    }
+
+    $reviewId = trim((string) ($_POST['review_id'] ?? ''));
+    $reply = trim((string) ($_POST['trader_reply'] ?? ''));
+
+    if ($reviewId === '' || $reply === '') {
+        flash_set('error', 'Reply text is required.');
+        portal_redirect('/trader/product-reviews.php?id=' . rawurlencode($productId));
+    }
+
+    if (strlen($reply) > 1000) {
+        flash_set('error', 'Reply must be 1000 characters or fewer.');
+        portal_redirect('/trader/product-reviews.php?id=' . rawurlencode($productId));
+    }
+
+    $owned = db_fetch_one(
+        'SELECT r.review_id FROM review r
+         INNER JOIN product p ON p.product_id = r.product_id
+         WHERE r.review_id = :rid AND p.product_id = :pid AND p.shop_id = :sid',
+        ['rid' => $reviewId, 'pid' => $productId, 'sid' => $shopId]
+    );
+
+    if (! $owned) {
+        flash_set('error', 'Review not found.');
+        portal_redirect('/trader/product-reviews.php?id=' . rawurlencode($productId));
+    }
+
+    try {
+        db_execute(
+            'UPDATE review SET trader_reply = :reply, trader_reply_date = SYSDATE WHERE review_id = :rid',
+            ['reply' => $reply, 'rid' => $reviewId]
+        );
+        db_commit();
+        flash_set('success', 'Your reply has been posted.');
+    } catch (Throwable $e) {
+        db_rollback();
+        error_log('product-reviews reply: ' . $e->getMessage());
+        flash_set('error', 'Could not save reply. Run php scripts/apply-oracle-updates.php if columns are missing.');
+    }
+
+    portal_redirect('/trader/product-reviews.php?id=' . rawurlencode($productId));
+}
+
 $reviews = [];
+$commentsByReview = [];
 $avgRating = 0.0;
 $reviewCount = 0;
 
@@ -41,6 +89,7 @@ try {
 
     $reviews = db_fetch_all(
         'SELECT r.review_id, r.rating, r.review_body, r.review_date,
+                r.trader_reply, r.trader_reply_date,
                 u.first_name, u.last_name
          FROM review r
          INNER JOIN users u ON u.user_id = r.customer_id
@@ -48,6 +97,23 @@ try {
          ORDER BY r.review_date DESC',
         ['pid' => $productId]
     );
+
+    $commentRows = db_fetch_all(
+        'SELECT c.comment_id, c.review_id, c.comment_body, c.comment_date,
+                u.first_name, u.last_name
+         FROM review_comment c
+         INNER JOIN users u ON u.user_id = c.customer_id
+         WHERE c.review_id IN (
+             SELECT review_id FROM review WHERE product_id = :pid
+         )
+         ORDER BY c.comment_date ASC',
+        ['pid' => $productId]
+    );
+
+    foreach ($commentRows as $row) {
+        $rid = (string) ($row['review_id'] ?? '');
+        $commentsByReview[$rid][] = $row;
+    }
 } catch (Throwable $e) {
     error_log('product-reviews: ' . $e->getMessage());
 }
@@ -81,10 +147,15 @@ require_once dirname(__DIR__) . '/includes/header.php';
             <div class="trader-reviews-list">
                 <?php foreach ($reviews as $review): ?>
                     <?php
+                    $reviewId = (string) ($review['review_id'] ?? '');
                     $name = trim((string) (($review['first_name'] ?? '') . ' ' . ($review['last_name'] ?? '')));
                     $rating = (int) ($review['rating'] ?? 0);
                     $dateRaw = $review['review_date'] ?? '';
                     $dateLabel = $dateRaw !== '' ? date('j M Y', strtotime((string) $dateRaw)) : '';
+                    $traderReply = trim((string) ($review['trader_reply'] ?? ''));
+                    $replyDateRaw = $review['trader_reply_date'] ?? '';
+                    $replyDateLabel = $replyDateRaw !== '' ? date('j M Y', strtotime((string) $replyDateRaw)) : '';
+                    $comments = $commentsByReview[$reviewId] ?? [];
                     ?>
                     <article class="card trader-review-card">
                         <div class="trader-review-head">
@@ -95,6 +166,45 @@ require_once dirname(__DIR__) . '/includes/header.php';
                         <?php if ($dateLabel !== ''): ?>
                             <time class="muted small"><?= h($dateLabel) ?></time>
                         <?php endif; ?>
+
+                        <?php if ($comments): ?>
+                            <ul class="trader-review-comments">
+                                <?php foreach ($comments as $comment): ?>
+                                    <?php
+                                    $cName = trim((string) (($comment['first_name'] ?? '') . ' ' . ($comment['last_name'] ?? '')));
+                                    $cDate = ($comment['comment_date'] ?? '') !== ''
+                                        ? date('j M Y', strtotime((string) $comment['comment_date']))
+                                        : '';
+                                    ?>
+                                    <li>
+                                        <strong><?= h($cName !== '' ? $cName : 'Customer') ?></strong>
+                                        <span class="muted small"> commented</span>
+                                        <p><?= nl2br(h((string) ($comment['comment_body'] ?? ''))) ?></p>
+                                        <?php if ($cDate !== ''): ?>
+                                            <time class="muted small"><?= h($cDate) ?></time>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+
+                        <?php if ($traderReply !== ''): ?>
+                            <div class="trader-review-shop-reply">
+                                <p class="trader-review-reply-label">Your reply</p>
+                                <p><?= nl2br(h($traderReply)) ?></p>
+                                <?php if ($replyDateLabel !== ''): ?>
+                                    <time class="muted small"><?= h($replyDateLabel) ?></time>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="post" class="trader-review-reply-form">
+                            <?= portal_csrf_field() ?>
+                            <input type="hidden" name="review_id" value="<?= h($reviewId) ?>">
+                            <label for="reply-<?= h($reviewId) ?>"><?= $traderReply !== '' ? 'Update your reply' : 'Reply to this review' ?></label>
+                            <textarea id="reply-<?= h($reviewId) ?>" name="trader_reply" rows="3" maxlength="1000" required placeholder="Thank the customer or address their feedback…"><?= h($traderReply) ?></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm"><?= $traderReply !== '' ? 'Update reply' : 'Post reply' ?></button>
+                        </form>
                     </article>
                 <?php endforeach; ?>
             </div>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Review extends BaseOracleModel
 {
@@ -17,6 +18,8 @@ class Review extends BaseOracleModel
         'review_date',
         'customer_id',
         'product_id',
+        'trader_reply',
+        'trader_reply_date',
     ];
 
     protected function casts(): array
@@ -24,6 +27,7 @@ class Review extends BaseOracleModel
         return [
             'rating' => 'integer',
             'review_date' => 'datetime',
+            'trader_reply_date' => 'datetime',
         ];
     }
 
@@ -35,6 +39,12 @@ class Review extends BaseOracleModel
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ReviewComment::class, 'review_id', 'review_id')
+            ->orderBy('comment_date');
     }
 }
 

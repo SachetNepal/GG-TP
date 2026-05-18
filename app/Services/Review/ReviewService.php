@@ -2,24 +2,29 @@
 
 namespace App\Services\Review;
 
+use App\Models\Order;
 use App\Models\Review;
+use App\Models\ReviewComment;
 use App\Models\User;
 use App\Support\OracleId;
 use Illuminate\Validation\ValidationException;
 
 class ReviewService
 {
-    public function findForUserProduct(User $user, string $productId): ?Review
+    /**
+     * Customer has bought this product at least once (non-cancelled order).
+     */
+    public function hasPurchasedProduct(User $user, string $productId): bool
     {
-        $customer = $user->customer;
-        if (! $customer) {
-            return null;
+        if (! $user->customer) {
+            return false;
         }
 
-        return Review::query()
-            ->where('product_id', $productId)
-            ->where('customer_id', $customer->customer_id)
-            ->first();
+        return Order::query()
+            ->where('customer_id', $user->user_id)
+            ->where('status', '!=', 'cancelled')
+            ->whereHas('items', fn ($q) => $q->where('product_id', $productId))
+            ->exists();
     }
 
     public function create(User $user, array $data): Review
@@ -29,9 +34,9 @@ class ReviewService
 
         $productId = $data['product_id'];
 
-        if ($this->findForUserProduct($user, $productId)) {
+        if (! $this->hasPurchasedProduct($user, $productId)) {
             throw ValidationException::withMessages([
-                'review' => 'You have already reviewed this product.',
+                'review' => 'You can leave a review after you have purchased this product at least once.',
             ]);
         }
 
@@ -44,5 +49,33 @@ class ReviewService
             'product_id' => $productId,
         ]);
     }
-}
 
+    public function createComment(User $user, Review $review, string $body): ReviewComment
+    {
+        $customer = $user->customer;
+        abort_if(! $customer, 403, 'Only customer accounts can comment on reviews.');
+
+        if (! $this->hasPurchasedProduct($user, $review->product_id)) {
+            throw ValidationException::withMessages([
+                'comment' => 'You can comment after you have purchased this product at least once.',
+            ]);
+        }
+
+        return ReviewComment::create([
+            'comment_id' => OracleId::next('REVIEW_COMMENT', 'comment_id', 'RC'),
+            'review_id' => $review->review_id,
+            'comment_body' => $body,
+            'comment_date' => now(),
+            'customer_id' => $customer->customer_id,
+        ]);
+    }
+
+    public function traderReply(Review $review, string $body): Review
+    {
+        $review->trader_reply = $body;
+        $review->trader_reply_date = now();
+        $review->save();
+
+        return $review;
+    }
+}

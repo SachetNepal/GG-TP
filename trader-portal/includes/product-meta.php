@@ -41,6 +41,22 @@ function product_status_label(?string $description, int $stock): string
 /**
  * Update STATUS: in description metadata block.
  */
+function product_display_description(?string $description): string
+{
+    if ($description === null || $description === '') {
+        return '';
+    }
+    $text = $description;
+    if (preg_match('/\|IMG:[^|\n]*/', $text)) {
+        $text = preg_replace('/\|IMG:[^|\n]*/', '', $text) ?? $text;
+    }
+    if (preg_match('/<!--.+?-->/s', $text)) {
+        $text = preg_replace('/\s*<!--.+?-->\s*/s', '', $text) ?? $text;
+    }
+
+    return trim($text);
+}
+
 function product_set_status_in_description(string $description, string $status): string
 {
     $status = strtolower($status);

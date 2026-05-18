@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Shop;
 use App\Services\Catalog\CatalogService;
 use App\Services\Review\ReviewService;
+use App\Support\ShopMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -27,10 +29,15 @@ class CatalogWebController extends Controller
             'min_rating' => $request->query('min_rating'),
         ];
 
+        $shops = Shop::query()->orderBy('shop_name')->get();
+
         return view('categories.index', [
             'products' => $this->catalogService->products($filters),
             'categories' => $this->catalogService->categories(),
-            'shops' => \App\Models\Shop::query()->orderBy('shop_name')->get(),
+            'shops' => $shops,
+            'shopLogos' => $shops->mapWithKeys(
+                fn (Shop $shop) => [$shop->shop_id => ShopMedia::forShop($shop)]
+            ),
             'filters' => $filters,
         ]);
     }
@@ -38,20 +45,24 @@ class CatalogWebController extends Controller
     public function show(string $id): View
     {
         $product = $this->catalogService->productDetail($id);
-        $userReview = Auth::check()
-            ? $this->reviewService->findForUserProduct(Auth::user(), $id)
-            : null;
+        $canReview = Auth::check()
+            && $this->reviewService->hasPurchasedProduct(Auth::user(), $id);
+
+        $similarProducts = $this->catalogService
+            ->similarProducts($product)
+            ->map(fn ($p) => $this->catalogService->productCardPayload($p));
 
         return view('products.show', [
             'product' => $product,
             'productId' => $id,
-            'userReview' => $userReview,
+            'canReview' => $canReview,
+            'similarProducts' => $similarProducts,
         ]);
     }
 
     public function shops(): View
     {
-        $shops = \App\Models\Shop::query()
+        $shops = Shop::query()
             ->whereHas('products', function ($q): void {
                 $q->where('product_in_stock', '>', 0)
                     ->where(function ($inner): void {
@@ -62,6 +73,11 @@ class CatalogWebController extends Controller
             ->orderBy('shop_name')
             ->get();
 
-        return view('traders.index', ['traders' => $shops]);
+        return view('traders.index', [
+            'traders' => $shops,
+            'shopLogos' => $shops->mapWithKeys(
+                fn (Shop $shop) => [$shop->shop_id => ShopMedia::forShop($shop)]
+            ),
+        ]);
     }
 }

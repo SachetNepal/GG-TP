@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ProductMeta;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,6 +60,43 @@ class Product extends BaseOracleModel
     {
         return $this->belongsToMany(Discount::class, 'PRODUCT_DISCOUNT', 'product_id', 'discount_id')
             ->withPivot('product_discount_id');
+    }
+
+    public function customerDescription(): string
+    {
+        return ProductMeta::displayDescription($this->description);
+    }
+
+    /**
+     * @return list<string> Trader-uploaded image URLs only
+     */
+    public function customerImageUrls(): array
+    {
+        return ProductMeta::imageUrls($this->shop_id, $this->description);
+    }
+
+    /**
+     * @return list<string> Uploaded images, or a single category placeholder
+     */
+    public function customerGalleryUrls(): array
+    {
+        $categoryName = $this->relationLoaded('category')
+            ? ($this->category->category_name ?? null)
+            : null;
+
+        return ProductMeta::displayImageUrls($this->shop_id, $this->description, $categoryName);
+    }
+
+    public function customerPrimaryImageUrl(): ?string
+    {
+        $gallery = $this->customerGalleryUrls();
+
+        return $gallery[0] ?? null;
+    }
+
+    public function customerUsesPlaceholderImage(): bool
+    {
+        return ProductMeta::usesCategoryPlaceholder($this->shop_id, $this->description);
     }
 }
 

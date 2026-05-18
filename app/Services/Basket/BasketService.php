@@ -49,13 +49,22 @@ class BasketService
     public function addItem(User $user, string $productId): Basket
     {
         $basket = $this->getBasket($user);
-        Product::query()->findOrFail($productId);
+        $product = Product::query()->findOrFail($productId);
 
-        DB::connection('oracle')->transaction(function () use ($basket, $productId): void {
+        if ((int) $product->product_in_stock <= 0) {
+            abort(422, 'This product is out of stock.');
+        }
+
+        DB::connection('oracle')->transaction(function () use ($basket, $productId, $product): void {
             $existing = BasketItem::query()
                 ->where('basket_id', $basket->basket_id)
                 ->where('product_id', $productId)
                 ->first();
+
+            $nextQty = ($existing ? (int) $existing->quantity : 0) + 1;
+            if ($nextQty > (int) $product->product_in_stock) {
+                abort(422, 'Not enough stock available for this product.');
+            }
 
             if ($existing) {
                 $existing->quantity = (int) $existing->quantity + 1;
@@ -85,6 +94,10 @@ class BasketService
         if ($item->quantity === 0) {
             $item->delete();
         } else {
+            $product = $item->product ?? Product::query()->find($item->product_id);
+            if ($product && $item->quantity > (int) $product->product_in_stock) {
+                abort(422, 'Not enough stock available for this product.');
+            }
             $item->save();
         }
 
