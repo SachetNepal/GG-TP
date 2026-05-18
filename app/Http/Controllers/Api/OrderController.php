@@ -20,7 +20,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    public function cancel(Request $request, int $orderId): JsonResponse
+    public function cancel(Request $request, string $orderId): JsonResponse
     {
         $order = Order::query()
             ->where('order_id', $orderId)

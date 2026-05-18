@@ -20,14 +20,16 @@ class CatalogService
             ->with(['shop', 'category'])
             ->withAvg('reviews', 'rating');
 
+        $this->applyCustomerVisibility($query);
         $this->applyFilters($query, $filters);
+        $this->applySort($query, (string) ($filters['sort'] ?? 'name'));
 
-        return $query->orderBy('product_name')->paginate(20);
+        return $query->paginate(20);
     }
 
     public function productDetail(string $productId): Product
     {
-        return Product::query()
+        $query = Product::query()
             ->withAvg('reviews', 'rating')
             ->with([
                 'shop.trader.user',
@@ -35,8 +37,30 @@ class CatalogService
                 'discounts',
                 'reviews' => fn ($q) => $q->orderByDesc('review_date'),
                 'reviews.customer.user',
-            ])
-            ->findOrFail($productId);
+            ]);
+
+        $this->applyCustomerVisibility($query);
+
+        return $query->findOrFail($productId);
+    }
+
+    protected function applyCustomerVisibility(Builder $query): void
+    {
+        $query->where('product_in_stock', '>', 0)
+            ->where(function (Builder $q): void {
+                $q->whereNull('description')
+                    ->orWhereRaw("description NOT LIKE '%STATUS:draft%'");
+            });
+    }
+
+    protected function applySort(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'price_asc' => $query->orderBy('price')->orderBy('product_name'),
+            'price_desc' => $query->orderByDesc('price')->orderBy('product_name'),
+            'rating_desc' => $query->orderByDesc('reviews_avg_rating')->orderBy('product_name'),
+            default => $query->orderBy('product_name'),
+        };
     }
 
     protected function applyFilters(Builder $query, array $filters): void

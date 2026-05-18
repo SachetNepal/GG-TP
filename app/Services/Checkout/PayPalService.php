@@ -242,14 +242,7 @@ class PayPalService
 
     protected function resolvePayPalAmount(float $cartTotal): float
     {
-        if ($this->isSandbox()) {
-            $testAmount = config('paypal.sandbox_test_amount');
-            if ($testAmount !== null && $testAmount !== '') {
-                return max(0.01, (float) $testAmount);
-            }
-        }
-
-        return max(0.01, $cartTotal);
+        return max(0.01, round($cartTotal, 2));
     }
 
     protected function accessToken(): string

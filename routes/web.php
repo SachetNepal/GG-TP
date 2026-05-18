@@ -32,15 +32,21 @@ Route::get('/verify-email', [AuthWebController::class, 'showVerifyEmail'])->name
 Route::post('/verify-email', [AuthWebController::class, 'verifyEmail'])->name('verify-email.submit');
 Route::post('/verify-email/resend', [AuthWebController::class, 'resendVerification'])->name('verify-email.resend');
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
+Route::get('/forgot-password', [AuthWebController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthWebController::class, 'sendForgotPassword'])->name('password.email');
+Route::get('/reset-password', [AuthWebController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthWebController::class, 'resetPassword'])->name('password.update');
 
 Route::get('/categories', [CatalogWebController::class, 'categories'])->name('categories');
 Route::get('/products/{id}', [CatalogWebController::class, 'show'])->name('products.show');
 Route::get('/shops', [CatalogWebController::class, 'shops'])->name('shops.index');
 Route::redirect('/traders', '/shops');
 
+Route::get('/cart', [CartWebController::class, 'index'])->name('cart');
+Route::post('/cart/items', [CartWebController::class, 'addItem'])->name('cart.add');
+Route::post('/cart/items/update', [CartWebController::class, 'updateItem'])->name('cart.update');
+
 Route::middleware('auth')->group(function (): void {
-    Route::get('/cart', [CartWebController::class, 'index'])->name('cart');
-    Route::post('/cart/items', [CartWebController::class, 'addItem'])->name('cart.add');
     Route::get('/checkout/collection-slot', [CheckoutWebController::class, 'showSlotPicker'])->name('checkout.collection-slot');
     Route::post('/checkout/paypal/create-order', [CheckoutWebController::class, 'createPayPalOrder'])->name('checkout.paypal.create');
     Route::post('/checkout/paypal/redirect', [CheckoutWebController::class, 'startPayPalRedirect'])->name('checkout.paypal.redirect');
@@ -49,7 +55,10 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/checkout/paypal/capture', [CheckoutWebController::class, 'capturePayPal'])->name('checkout.paypal.capture');
     Route::post('/checkout', [CheckoutWebController::class, 'checkout'])->name('checkout');
     Route::get('/profile', [ProfileWebController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileWebController::class, 'update'])->name('profile.update');
     Route::get('/orders', [OrderWebController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{orderId}', [OrderWebController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{orderId}/cancel', [OrderWebController::class, 'cancel'])->name('orders.cancel');
     Route::post('/products/{id}/reviews', [ReviewWebController::class, 'store'])->name('products.reviews.store');
 });
 

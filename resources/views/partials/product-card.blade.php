@@ -30,7 +30,7 @@
 
     <div class="product-bottom-row">
         <div class="product-price">
-            Rs {{ number_format($price, 0) }}
+            {{ \App\Support\Money::format($price) }}
         </div>
         @include('partials.status-badge', ['label' => $stockLabel, 'variant' => $stockVariant])
     </div>

@@ -23,6 +23,8 @@ class CatalogWebController extends Controller
             'q' => $request->query('q'),
             'category_id' => array_values(array_filter((array) $request->query('category_id', []))),
             'shop_id' => array_values(array_filter((array) $request->query('shop_id', []))),
+            'sort' => $request->query('sort', 'name'),
+            'min_rating' => $request->query('min_rating'),
         ];
 
         return view('categories.index', [
@@ -49,14 +51,17 @@ class CatalogWebController extends Controller
 
     public function shops(): View
     {
-        $products = $this->catalogService->products([]);
+        $shops = \App\Models\Shop::query()
+            ->whereHas('products', function ($q): void {
+                $q->where('product_in_stock', '>', 0)
+                    ->where(function ($inner): void {
+                        $inner->whereNull('description')
+                            ->orWhereRaw("description NOT LIKE '%STATUS:draft%'");
+                    });
+            })
+            ->orderBy('shop_name')
+            ->get();
 
-        $traders = $products->getCollection()
-            ->pluck('shop')
-            ->filter()
-            ->unique('shop_id')
-            ->values();
-
-        return view('traders.index', ['traders' => $traders]);
+        return view('traders.index', ['traders' => $shops]);
     }
 }

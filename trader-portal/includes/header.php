@@ -28,7 +28,7 @@ $me = auth_user();
     <link rel="stylesheet" href="<?= h(app_url('css/style.css')) ?>">
     <link rel="stylesheet" href="<?= h(portal_asset('css/trader-portal.css')) ?>">
 </head>
-<body class="<?= ($traderLayout && $me) ? 'layout-app' : 'layout-auth-page' ?>">
+<body class="<?= ($traderLayout && $me) ? 'layout-app' : 'layout-auth-page' ?>" data-portal-base="<?= h(rtrim(PORTAL_BASE, '/')) ?>">
 <?php require __DIR__ . '/partials/site-header.php'; ?>
 
 <?php if ($traderLayout && $me): ?>

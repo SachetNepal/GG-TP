@@ -75,8 +75,13 @@ function portal_password_verify(string $plain, string $stored): bool
     return hash_equals($stored, $plain);
 }
 
-function login_trader(string $email, string $password): bool
+/**
+ * @return true|'unverified'|false
+ */
+function login_trader(string $email, string $password): bool|string
 {
+    require_once __DIR__ . '/verification.php';
+
     $sql = 'SELECT u.user_id, u.email, u.password, u.first_name, u.last_name, t.trader_id
             FROM users u
             INNER JOIN trader t ON t.trader_id = u.user_id
@@ -88,6 +93,10 @@ function login_trader(string $email, string $password): bool
     }
     if (!$row || ! portal_password_verify($password, (string) ($row['password'] ?? ''))) {
         return false;
+    }
+
+    if (!portal_user_email_verified((string) $row['user_id'])) {
+        return 'unverified';
     }
 
     $_SESSION['user_id'] = (string) $row['user_id'];

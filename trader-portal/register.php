@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/verification.php';
 
 if (auth_user()) {
     portal_redirect('/trader/dashboard.php');
@@ -38,11 +39,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         'SELECT admin_id FROM trader WHERE ROWNUM = 1'
                     ) ?? 'U6');
 
-                    $st = db_execute(
-                        'INSERT INTO users (user_id, first_name, last_name, email, password, phone_num, address, created_at)
-                         VALUES (:id, :fn, :ln, :em, :pw, \'-\', \'-\', SYSTIMESTAMP)',
-                        ['id' => $userId, 'fn' => $fn, 'ln' => $ln, 'em' => $email, 'pw' => $hash]
-                    );
+                    $userSql = 'INSERT INTO users (user_id, first_name, last_name, email, password, phone_num, address, created_at, email_verified)
+                         VALUES (:id, :fn, :ln, :em, :pw, \'-\', \'-\', SYSTIMESTAMP, 0)';
+                    try {
+                        $st = db_execute($userSql, [
+                            'id' => $userId, 'fn' => $fn, 'ln' => $ln, 'em' => $email, 'pw' => $hash,
+                        ]);
+                    } catch (Throwable) {
+                        $st = db_execute(
+                            'INSERT INTO users (user_id, first_name, last_name, email, password, phone_num, address, created_at)
+                             VALUES (:id, :fn, :ln, :em, :pw, \'-\', \'-\', SYSTIMESTAMP)',
+                            ['id' => $userId, 'fn' => $fn, 'ln' => $ln, 'em' => $email, 'pw' => $hash]
+                        );
+                    }
                     if ($st) {
                         oci_free_statement($st);
                     }
@@ -65,8 +74,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     }
 
                     db_commit();
-                    login_trader($email, $pass);
-                    portal_redirect('/trader/dashboard.php');
+                    try {
+                        portal_send_signup_verification($userId);
+                    } catch (Throwable $mailErr) {
+                        error_log('trader verify email: ' . $mailErr->getMessage());
+                        flash_set('error', 'Account created but verification email could not be sent. Use resend on the verify page.');
+                    }
+                    portal_redirect('/verify-email.php?email=' . rawurlencode($email));
                 }
             } catch (Throwable $e) {
                 db_rollback();
@@ -83,7 +97,6 @@ require_once __DIR__ . '/includes/header.php';
       <article class="card auth-card" style="max-width:520px;margin-left:auto;margin-right:auto;">
         <header class="auth-header">
           <h1>Create trader account</h1>
-          <p class="text-secondary">Registers in Oracle (USERS + TRADER + SHOP).</p>
         </header>
         <?php if ($error !== ''): ?>
             <div class="alert alert-error"><?= h($error) ?></div>

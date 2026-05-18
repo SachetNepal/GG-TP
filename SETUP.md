@@ -46,7 +46,7 @@ Optional (email on new XAMPP): copy Gmail/sendmail settings into `C:\xampp\sendm
 - **`.env`** — Laravel DB, PayPal sandbox, mail, `APP_KEY`, `APP_URL`
 - **`db.php`** — Oracle user/password/TNS for trader portal + `test-db.php`
 - **`trader-portal/config.php`** — `APP_BASE`, `PORTAL_BASE`
-- **All application code**, `composer.lock`, assets, SQL notes under `database/sql/`
+- **All application code**, `composer.lock`, assets
 
 ## What is NOT in git (generated on each PC)
 
@@ -79,7 +79,7 @@ If signup OTP columns are missing:
 php artisan grocery:email-verification-schema
 ```
 
-Or run `database/sql/oracle-email-verification.sql` in SQL Developer.
+Or run `php scripts/apply-oracle-updates.php --skip-prices` to apply schema updates on a new machine.
 
 ## Quick verify
 

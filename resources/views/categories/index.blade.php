@@ -16,6 +16,26 @@
                     @endif
 
                     <div class="filters-block">
+                        <h3>Sort by</h3>
+                        <select class="input" name="sort" style="width:100%;">
+                            <option value="name" @selected(($filters['sort'] ?? 'name') === 'name')>Name (A-Z)</option>
+                            <option value="price_asc" @selected(($filters['sort'] ?? '') === 'price_asc')>Price: low to high</option>
+                            <option value="price_desc" @selected(($filters['sort'] ?? '') === 'price_desc')>Price: high to low</option>
+                            <option value="rating_desc" @selected(($filters['sort'] ?? '') === 'rating_desc')>Rating: highest first</option>
+                        </select>
+                    </div>
+
+                    <div class="filters-block">
+                        <h3>Minimum rating</h3>
+                        <select class="input" name="min_rating" style="width:100%;">
+                            <option value="">Any rating</option>
+                            @foreach ([5, 4, 3] as $r)
+                                <option value="{{ $r }}" @selected((string) ($filters['min_rating'] ?? '') === (string) $r)">{{ $r }}+ stars</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="filters-block">
                         <h3>Categories</h3>
                         <div class="filters-options">
                             @foreach ($categories as $cat)
@@ -52,7 +72,7 @@
 
             <div class="categories-main">
                 @if (!empty($filters['q']))
-                    <p class="text-secondary" style="margin-bottom:12px;">Search: “{{ $filters['q'] }}”</p>
+                    <p class="text-secondary" style="margin-bottom:12px;">Search: "{{ $filters['q'] }}"</p>
                 @endif
 
                 <div class="product-grid">

@@ -114,3 +114,16 @@ function safe_filename(string $name): string
     $name = basename($name);
     return preg_replace('/[^a-zA-Z0-9._-]/', '_', $name) ?? 'file';
 }
+
+/** CSS class for order/stock status pills on trader pages. */
+function trader_status_pill_class(string $status): string
+{
+    $key = preg_replace('/[^a-z]/', '', strtolower($status)) ?: 'pending';
+
+    return match ($key) {
+        'ok', 'completed', 'ready', 'active', 'published' => 'status-pill--ok',
+        'low', 'processing', 'placed', 'draft' => 'status-pill--low',
+        'out', 'cancelled', 'inactive' => 'status-pill--out',
+        default => 'status-pill--pending',
+    };
+}

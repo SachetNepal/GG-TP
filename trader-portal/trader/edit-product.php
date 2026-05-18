@@ -6,9 +6,9 @@ require_once dirname(__DIR__) . '/includes/auth.php';
 
 $me = require_trader();
 $shopId = trader_shop_id($me);
-$id = (int) ($_GET['id'] ?? 0);
+$id = trim((string) ($_GET['id'] ?? ''));
 
-if ($id < 1 || $shopId < 1) {
+if ($id === '' || $shopId === '') {
     flash_set('error', 'Invalid product.');
     portal_redirect('/trader/manage-products.php');
 }
@@ -29,18 +29,23 @@ $categories = db_fetch_all(
 
 $pageTitle = 'Edit product';
 $traderLayout = true;
+$traderPageTitle = 'Edit product';
+$traderPageEyebrow = 'Products';
+$traderPageSubtitle = (string) ($row['product_name'] ?? '');
+$traderPageActionsHtml = '<a class="btn btn-outline" href="' . h(portal_url('trader/manage-products.php')) . '">← Products</a>';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
+    <div class="trader-dashboard">
+        <?php require dirname(__DIR__) . '/includes/partials/trader-page-header.php'; ?>
+
     <form id="productForm"
           action="<?= h(portal_url('api/update-product.php')) ?>"
           method="post"
-          class="panel"
+          class="dash-panel dash-form"
           data-redirect-published="<?= h(portal_url('trader/manage-products.php')) ?>">
 
         <?= portal_csrf_field() ?>
-        <input type="hidden" name="product_id" value="<?= (int) $id ?>">
-
-        <h1 class="panel-title">Edit product</h1>
+        <input type="hidden" name="product_id" value="<?= h($id) ?>">
 
         <div class="form-grid cols-2">
             <div style="grid-column:1/-1;">
@@ -64,7 +69,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
                 </select>
             </div>
             <div>
-                <label for="price">Price (£)</label>
+                <label for="price">Price (USD $)</label>
                 <input class="input" type="number" step="0.01" name="price" id="price" required
                        value="<?= h((string) ($row['price'] ?? '')) ?>">
             </div>
@@ -80,4 +85,5 @@ require_once dirname(__DIR__) . '/includes/header.php';
             <a class="btn btn-outline" href="<?= h(portal_url('trader/manage-products.php')) ?>">Cancel</a>
         </div>
     </form>
+    </div>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

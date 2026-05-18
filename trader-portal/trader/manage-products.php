@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
+require_once dirname(__DIR__) . '/includes/product-meta.php';
 
 $me = require_trader();
 $shopId = trader_shop_id($me);
@@ -20,7 +21,7 @@ $products = [];
 if (trader_has_shop($me)) {
     try {
         $products = db_fetch_all(
-            "SELECT p.product_id, p.product_name, p.price, p.product_in_stock, p.category_id, c.cat_name AS category_name
+            "SELECT p.product_id, p.product_name, p.price, p.product_in_stock, p.description, p.category_id, c.cat_name AS category_name
              FROM product p
              LEFT JOIN category c ON c.category_id = p.category_id
              WHERE $where
@@ -32,59 +33,83 @@ if (trader_has_shop($me)) {
     }
 }
 
-$pageTitle = 'Manage products';
+$pageTitle = 'Products';
 $traderLayout = true;
+$traderPageTitle = 'Products';
+$traderPageEyebrow = 'Manage shop';
+$traderPageSubtitle = count($products) . ' product(s) in your catalogue';
+$traderPageActionsHtml = '<a class="btn btn-primary" href="' . h(portal_url('trader/add-product.php')) . '">Add product</a>';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
-    <section class="panel">
-        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h1 class="panel-title" style="margin:0;">Products</h1>
-            <a class="btn btn-primary" href="<?= h(portal_url('trader/add-product.php')) ?>">Add product</a>
-        </div>
-        <form method="get" class="form-grid cols-2" style="margin-bottom:16px;max-width:520px;">
-            <div>
-                <label for="q">Search</label>
-                <input class="input" id="q" name="q" value="<?= h($search) ?>" placeholder="Name…">
-            </div>
-            <div style="display:flex;align-items:flex-end;">
-                <button type="submit" class="btn btn-outline">Search</button>
-            </div>
-        </form>
+    <div class="trader-dashboard">
+        <?php require dirname(__DIR__) . '/includes/partials/trader-page-header.php'; ?>
 
-        <div class="table-scroll">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Category</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!$products): ?>
-                        <tr><td colspan="5" class="muted">No products yet.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($products as $p): ?>
-                            <tr>
-                                <td><?= h((string) ($p['product_name'] ?? '')) ?></td>
-                                <td>£<?= number_format((float) ($p['price'] ?? 0), 2) ?></td>
-                                <td><?= (int) ($p['product_in_stock'] ?? 0) ?></td>
-                                <td><?= h((string) ($p['category_name'] ?? '')) ?></td>
-                                <td style="white-space:nowrap;">
-                                    <a class="btn btn-outline" style="padding:8px 12px;font-size:14px;" href="<?= h(portal_url('trader/edit-product.php?id=' . (int) ($p['product_id'] ?? 0))) ?>">Edit</a>
-                                    <button type="button"
-                                            class="btn btn-outline btn-delete-product"
-                                            style="padding:8px 12px;font-size:14px;color:#991b1b;border-color:#fecaca;"
-                                            data-product-id="<?= (int) ($p['product_id'] ?? 0) ?>"
-                                            data-delete-url="<?= h(portal_url('api/delete-product.php')) ?>">Delete</button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+        <section class="dash-panel">
+            <form method="get" class="dash-filters cols-2">
+                <div>
+                    <label for="q">Search products</label>
+                    <input class="input" id="q" name="q" value="<?= h($search) ?>" placeholder="Product name…">
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <?php if ($search !== ''): ?>
+                        <a class="btn btn-outline" href="<?= h(portal_url('trader/manage-products.php')) ?>">Clear</a>
                     <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </section>
+                </div>
+            </form>
+
+            <div class="table-scroll">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!$products): ?>
+                            <tr><td colspan="6" class="dash-empty">No products yet. Add your first product to get started.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($products as $p): ?>
+                                <?php
+                                $pid = (string) ($p['product_id'] ?? '');
+                                $status = product_status_label((string) ($p['description'] ?? ''), (int) ($p['product_in_stock'] ?? 0));
+                                $pillClass = trader_status_pill_class($status);
+                                ?>
+                                <tr>
+                                    <td><strong><?= h((string) ($p['product_name'] ?? '')) ?></strong></td>
+                                    <td>$<?= number_format((float) ($p['price'] ?? 0), 2) ?></td>
+                                    <td><?= (int) ($p['product_in_stock'] ?? 0) ?></td>
+                                    <td><span class="status-pill <?= h($pillClass) ?>"><?= h(ucfirst($status)) ?></span></td>
+                                    <td><?= h((string) ($p['category_name'] ?? '')) ?></td>
+                                    <td>
+                                        <div class="dash-actions-cell">
+                                            <?php if ($status === 'active'): ?>
+                                                <button type="button" class="btn btn-outline btn-toggle-product"
+                                                        data-product-id="<?= h($pid) ?>" data-action="deactivate"
+                                                        data-toggle-url="<?= h(portal_url('api/toggle-product.php')) ?>">Deactivate</button>
+                                            <?php else: ?>
+                                                <button type="button" class="btn btn-outline btn-toggle-product"
+                                                        data-product-id="<?= h($pid) ?>" data-action="activate"
+                                                        data-toggle-url="<?= h(portal_url('api/toggle-product.php')) ?>">Activate</button>
+                                            <?php endif; ?>
+                                            <a class="btn btn-outline" href="<?= h(portal_url('trader/edit-product.php?id=' . rawurlencode($pid))) ?>">Edit</a>
+                                            <a class="btn btn-outline" href="<?= h(portal_url('trader/product-reviews.php?id=' . rawurlencode($pid))) ?>">Reviews</a>
+                                            <button type="button" class="btn btn-outline btn-danger btn-delete-product"
+                                                    data-product-id="<?= h($pid) ?>"
+                                                    data-delete-url="<?= h(portal_url('api/delete-product.php')) ?>">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

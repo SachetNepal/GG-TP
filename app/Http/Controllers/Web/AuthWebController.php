@@ -8,8 +8,13 @@ use App\Http\Requests\Auth\RegisterCustomerRequest;
 use App\Http\Requests\Auth\ResendVerificationRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Models\User;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Services\Auth\AuthService;
 use App\Services\Auth\EmailVerificationService;
+use App\Services\Auth\PasswordResetService;
+use App\Services\Basket\BasketService;
+use App\Services\Basket\GuestCartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use RuntimeException;
@@ -19,6 +24,9 @@ class AuthWebController extends Controller
     public function __construct(
         protected AuthService $authService,
         protected EmailVerificationService $emailVerificationService,
+        protected GuestCartService $guestCart,
+        protected BasketService $basketService,
+        protected PasswordResetService $passwordResetService,
     ) {
     }
 
@@ -55,14 +63,22 @@ class AuthWebController extends Controller
             return redirect('/GG-TP/trader-portal/trader/dashboard.php');
         }
 
+        try {
+            $this->guestCart->mergeIntoUserBasket($user, $this->basketService);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return redirect()->intended(route('home'));
     }
 
-    public function showRegister(): View
+    public function showRegister(): View|RedirectResponse
     {
-        return view('auth.register', [
-            'type' => request('type', 'customer'),
-        ]);
+        if (strtolower((string) request('type', 'customer')) === 'trader') {
+            return redirect(url('trader-portal/register.php'));
+        }
+
+        return view('auth.register');
     }
 
     public function register(RegisterCustomerRequest $request): RedirectResponse
@@ -116,6 +132,51 @@ class AuthWebController extends Controller
         return redirect()
             ->route('verify-email', ['email' => $request->validated('email')])
             ->with('status', 'A new verification code has been sent to your email.');
+    }
+
+    public function showForgotPassword(): View
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendForgotPassword(ForgotPasswordRequest $request): RedirectResponse
+    {
+        try {
+            $this->passwordResetService->sendResetLink($request->validated('email'));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Could not send reset email. Try again later.']);
+        }
+
+        return back()->with('status', 'If an account exists for that email, a reset link has been sent.');
+    }
+
+    public function showResetPassword(): View
+    {
+        return view('auth.reset-password', [
+            'token' => request('token', ''),
+        ]);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): RedirectResponse
+    {
+        try {
+            $this->passwordResetService->resetPassword(
+                $request->validated('token'),
+                $request->validated('password'),
+            );
+        } catch (RuntimeException $e) {
+            return back()
+                ->withInput($request->only('token'))
+                ->withErrors(['password' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('status', 'Password updated. You can sign in now.');
     }
 
     public function logout(): RedirectResponse

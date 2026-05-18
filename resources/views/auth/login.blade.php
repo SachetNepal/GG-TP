@@ -10,7 +10,7 @@
                 {{-- 1. Center Card Layout --}}
                 <header class="auth-header">
                     <h1>Login</h1>
-                    <p>Welcome back to GroceryGo. Demo: john.smith@email.com / pass123</p>
+                    <p>Welcome back to GroceryGo.</p>
                 </header>
 
                 @if (session('status'))
@@ -36,7 +36,7 @@
                             <input id="rememberMe" name="remember" type="checkbox">
                             <span>Remember me</span>
                         </label>
-                        <a href="{{ route('contact') }}" class="forgot-link">Forgot password?</a>
+                        <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
                     </div>
 
                     {{-- 2. Primary Button --}}
@@ -53,7 +53,7 @@
 
                 {{-- 5. Role Switch --}}
                 <div class="auth-role-switch">
-                    <a href="/GG-TP/trader-portal/login.php" class="btn auth-role-btn">Trader</a>
+                    <a href="{{ url('trader-portal/login.php') }}" class="btn auth-role-btn">Trader</a>
                 </div>
             </article>
         </div>

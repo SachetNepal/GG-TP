@@ -27,7 +27,7 @@
                 <h2 class="product-details-name">{{ $product->product_name }}</h2>
 
                 <div class="product-details-price-row">
-                    <div class="product-price-large">£{{ number_format((float) $product->price, 2) }}</div>
+                    <div class="product-price-large">{{ \App\Support\Money::format((float) $product->price) }}</div>
                     @include('partials.status-badge', ['label' => $stockLabel, 'variant' => $stockVariant])
                 </div>
 
@@ -52,19 +52,20 @@
                     <p class="ok" style="margin-bottom:12px;">{{ session('status') }}</p>
                 @endif
 
-                @auth
-                    <form method="post" action="{{ route('cart.add') }}" class="product-qty-add">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->product_id }}">
-                        <div class="qty-field">
-                            <label for="quantity">Quantity</label>
-                            <input id="quantity" class="qty-input" type="number" name="quantity" value="1" min="1" max="20">
-                        </div>
-                        <button type="submit" class="btn btn-primary product-add-btn">Add to Basket</button>
-                    </form>
-                @else
-                    <p><a href="{{ route('login') }}">Sign in</a> to add to basket.</p>
-                @endauth
+                <form method="post" action="{{ route('cart.add') }}" class="product-qty-add">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                    <div class="qty-field">
+                        <label for="quantity">Quantity</label>
+                        <input id="quantity" class="qty-input" type="number" name="quantity" value="1" min="1" max="20">
+                    </div>
+                    <button type="submit" class="btn btn-primary product-add-btn">Add to Basket</button>
+                </form>
+                @guest
+                    <p class="text-secondary" style="margin-top:10px;font-size:14px;">
+                        You can shop without signing in. <a href="{{ route('login') }}">Sign in</a> when you are ready to checkout.
+                    </p>
+                @endguest
 
                 <section class="reviews-section">
                     <h3 class="reviews-section-title">Reviews</h3>

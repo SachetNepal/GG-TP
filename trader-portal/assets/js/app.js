@@ -78,10 +78,12 @@
         labels: labels,
         datasets: [
           {
-            label: "Revenue (£)",
+            label: "Revenue (USD $)",
             data: amounts,
-            backgroundColor: "rgba(31, 122, 77, 0.65)",
-            borderRadius: 10,
+            backgroundColor: "rgba(31, 122, 77, 0.72)",
+            borderColor: "#1F7A4D",
+            borderWidth: 1,
+            borderRadius: 8,
             borderSkipped: false,
           },
         ],
@@ -93,11 +95,18 @@
           legend: { display: false },
         },
         scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: "#6B7280", font: { size: 12 } },
+          },
           y: {
             beginAtZero: true,
+            grid: { color: "rgba(229, 231, 235, 0.8)" },
             ticks: {
+              color: "#6B7280",
+              font: { size: 12 },
               callback: function (v) {
-                return "£" + v;
+                return "$" + v;
               },
             },
           },
@@ -126,7 +135,7 @@
         var elS = qs("#statSlots");
         if (elR) {
           elR.textContent =
-            "£" +
+            "$" +
             Number(j.revenue || 0).toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -306,6 +315,79 @@
     });
   }
 
+  function initToggleProducts() {
+    qsa(".btn-toggle-product").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var url = btn.getAttribute("data-toggle-url");
+        var pid = btn.getAttribute("data-product-id");
+        var action = btn.getAttribute("data-action");
+        var csrfMeta = qs('meta[name="csrf-token"]');
+        var csrf = csrfMeta ? csrfMeta.getAttribute("content") : "";
+        var fd = new FormData();
+        fd.append("product_id", pid);
+        fd.append("action", action);
+        fd.append("_csrf", csrf);
+        fetch(url, {
+          method: "POST",
+          body: fd,
+          credentials: "same-origin",
+          headers: csrf ? { "X-CSRF-TOKEN": csrf } : {},
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (j) {
+            if (j.ok) {
+              showToast("Product updated.");
+              window.location.reload();
+            } else {
+              showToast(j.error || "Update failed", "error");
+            }
+          })
+          .catch(function () {
+            showToast("Network error", "error");
+          });
+      });
+    });
+  }
+
+  function initOrderStatusForm() {
+    var form = qs("#orderStatusForm");
+    if (!form) {
+      return;
+    }
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var csrfMeta = qs('meta[name="csrf-token"]');
+      var csrf = csrfMeta ? csrfMeta.getAttribute("content") : "";
+      var fd = new FormData(form);
+      var url = form.getAttribute("data-update-url") || "";
+      if (!url) {
+        return;
+      }
+      fetch(url, {
+        method: "POST",
+        body: fd,
+        credentials: "same-origin",
+        headers: csrf ? { "X-CSRF-TOKEN": csrf } : {},
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (j) {
+          if (j.ok) {
+            showToast("Order status updated.");
+            window.location.reload();
+          } else {
+            showToast(j.error || "Update failed", "error");
+          }
+        })
+        .catch(function () {
+          showToast("Network error", "error");
+        });
+    });
+  }
+
   function initDeleteButtons() {
     qsa(".btn-delete-product").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -348,5 +430,7 @@
     refreshStats();
     initProductForm();
     initDeleteButtons();
+    initToggleProducts();
+    initOrderStatusForm();
   });
 })();

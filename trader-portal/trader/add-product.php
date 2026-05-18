@@ -18,9 +18,16 @@ try {
 
 $pageTitle = 'Add product';
 $traderLayout = true;
+$traderPageTitle = 'Add product';
+$traderPageEyebrow = 'Products';
+$traderPageSubtitle = 'Create a new listing for your shop';
+$traderPageActionsHtml = '<a class="btn btn-outline" href="' . h(portal_url('trader/manage-products.php')) . '">← Products</a>';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
-    <div class="form-actions-top">
+    <div class="trader-dashboard">
+        <?php require dirname(__DIR__) . '/includes/partials/trader-page-header.php'; ?>
+
+        <div class="form-actions-top dash-panel" style="display:flex;flex-wrap:wrap;gap:10px;padding:16px 20px;">
         <button type="button" class="btn btn-outline" data-product-action="new">Add new product</button>
         <button type="button" class="btn btn-outline" data-product-action="draft">Save as draft</button>
         <button type="button" class="btn btn-accent" data-product-action="publish">Publish product</button>
@@ -36,7 +43,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
         <input type="hidden" name="status" id="statusField" value="draft">
         <input type="hidden" name="tags" id="tagsField" value="">
 
-        <section class="panel">
+        <section class="dash-panel">
             <h2 class="panel-title">Product information</h2>
             <div class="form-grid cols-2">
                 <div style="grid-column: 1 / -1;">
@@ -65,11 +72,11 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </div>
         </section>
 
-        <section class="panel">
+        <section class="dash-panel">
             <h2 class="panel-title">Pricing &amp; stock</h2>
             <div class="form-grid cols-2">
                 <div>
-                    <label for="price">Price (£)</label>
+                    <label for="price">Price (USD $)</label>
                     <input class="input" type="number" step="0.01" min="0" id="price" name="price" required>
                 </div>
                 <div>
@@ -87,7 +94,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </div>
         </section>
 
-        <section class="panel">
+        <section class="dash-panel">
             <h2 class="panel-title">Dietary &amp; tags</h2>
             <div class="pill-row">
                 <?php
@@ -99,7 +106,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </div>
         </section>
 
-        <section class="panel">
+        <section class="dash-panel">
             <h2 class="panel-title">Product images</h2>
             <div class="dropzone" id="dropzone" tabindex="0">
                 <p><strong>Drag &amp; drop</strong> images here or click to browse.</p>
@@ -109,7 +116,7 @@ require_once dirname(__DIR__) . '/includes/header.php';
             <div class="preview-grid" id="imagePreview"></div>
         </section>
 
-        <section class="panel">
+        <section class="dash-panel">
             <h2 class="panel-title">Status &amp; visibility</h2>
             <div class="form-grid cols-2">
                 <div>
@@ -126,4 +133,5 @@ require_once dirname(__DIR__) . '/includes/header.php';
             </div>
         </section>
     </form>
+    </div>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

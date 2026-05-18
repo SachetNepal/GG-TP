@@ -41,8 +41,7 @@
   font-size: 13px;
 }
 
-/* Trader strip removed — tools live in main site-header nav */
-
+/* Trader strip unused — tools live in site-header nav */
 .trader-strip {
   display: none;
 }
@@ -631,4 +630,556 @@
 .trader-page-wrap .btn-outline:hover {
   border-color: var(--primary-green);
   color: var(--primary-green-dark);
+}
+
+/* ----- Trader-only header nav ----- */
+.nav-primary--trader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.nav-primary--trader a {
+  color: var(--primary-green-dark);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  padding: 6px 0;
+}
+
+.nav-primary--trader a:hover {
+  color: var(--accent-orange);
+}
+
+.layout-app .main-nav {
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.nav-actions--auth {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nav-actions--auth .nav-home-link {
+  color: var(--primary-green-dark);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  padding: 6px 4px;
+}
+
+.nav-actions--auth .nav-home-link:hover {
+  color: var(--accent-orange);
+}
+
+.site-footer--trader {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-white);
+}
+
+.footer-trader-simple {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.footer-trader-simple .footer-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ----- Product reviews (trader) ----- */
+.stars-gold {
+  color: #fbbf24;
+  letter-spacing: 2px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.trader-rating-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.trader-reviews-list {
+  display: grid;
+  gap: 12px;
+}
+
+.trader-review-card {
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-soft);
+}
+
+.trader-review-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.trader-review-head strong {
+  color: var(--primary-green-dark);
+}
+
+.trader-review-card p {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* =========================
+   Trader dashboard (home-style)
+========================= */
+.trader-page-wrap {
+  background: var(--bg-light);
+}
+
+.trader-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px;
+  background: #fffef5;
+  border: 1.5px solid #d1d5db;
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 14px rgba(31, 122, 77, 0.12);
+}
+
+.dash-eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary-green);
+}
+
+.dash-title {
+  margin: 0;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--primary-green-dark);
+}
+
+.dash-subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.dash-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dash-kpi-row {
+  margin-bottom: 0;
+}
+
+.dash-kpi-card {
+  background: #fffef5;
+  border: 1.5px solid #d1d5db;
+  box-shadow: 0 4px 14px rgba(31, 122, 77, 0.12);
+  text-align: left;
+  padding: 22px 24px;
+}
+
+.dash-kpi-card .kpi-label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dash-kpi-card .kpi-value {
+  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+  color: var(--primary-green-dark);
+}
+
+.dash-grid {
+  display: grid;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (min-width: 992px) {
+  .dash-grid {
+    grid-template-columns: 1.35fr 1fr;
+  }
+}
+
+.dash-panel {
+  background: #fffef5;
+  border: 1.5px solid #d1d5db;
+  border-radius: var(--radius-card);
+  padding: 22px 24px;
+  box-shadow: 0 4px 14px rgba(31, 122, 77, 0.12);
+}
+
+.dash-panel--wide {
+  margin-bottom: 8px;
+}
+
+.dash-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.dash-panel-head .wf-section-title {
+  margin-bottom: 0;
+}
+
+.dash-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-green);
+  text-decoration: none;
+}
+
+.dash-link:hover {
+  color: var(--accent-orange);
+}
+
+.dash-chart-wrap {
+  position: relative;
+  height: 300px;
+  margin-top: 8px;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dash-table thead {
+  background: rgba(31, 122, 77, 0.08);
+}
+
+.dash-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary-green-dark);
+  border-bottom: 1px solid #d1d5db;
+}
+
+.dash-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.dash-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-table tbody tr:hover {
+  background: rgba(31, 122, 77, 0.04);
+}
+
+.dash-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 28px 14px !important;
+}
+
+.dash-order-link {
+  font-weight: 600;
+  color: var(--primary-green-dark);
+}
+
+.dash-order-link:hover {
+  color: var(--accent-orange);
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-pill--ok,
+.status-pill--completed,
+.status-pill--ready {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.status-pill--low,
+.status-pill--processing,
+.status-pill--placed {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.status-pill--out,
+.status-pill--cancelled {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.status-pill--pending {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Filters, tabs, forms on trader pages */
+.dash-filters {
+  display: grid;
+  gap: 14px 18px;
+  margin-bottom: 18px;
+}
+
+@media (min-width: 640px) {
+  .dash-filters.cols-2 {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+  }
+
+  .dash-filters.cols-3 {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+  }
+}
+
+.dash-filters label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.dash-filters .filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.dash-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dash-tabs .btn {
+  min-width: 120px;
+}
+
+.dash-form .input,
+.dash-form select.input,
+.dash-form textarea.input {
+  background: var(--bg-white);
+  border-color: #d1d5db;
+}
+
+.dash-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 16px 0 20px;
+}
+
+.dash-detail-item {
+  padding: 14px 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-btn);
+}
+
+.dash-detail-item .label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.dash-detail-item .value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.dash-actions-cell .btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.dash-actions-cell .btn-danger {
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.dash-back {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-green);
+}
+
+.dash-back:hover {
+  color: var(--accent-orange);
+}
+
+.dash-nav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dash-nav-pills a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(31, 122, 77, 0.1);
+  color: var(--primary-green-dark);
+  text-decoration: none;
+}
+
+.dash-nav-pills a:hover {
+  background: rgba(31, 122, 77, 0.18);
+}
+
+.dash-discount-edit-body {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-btn);
+  min-width: 220px;
+}
+
+.dash-discount-edit-body label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 10px 0 4px;
+  color: var(--text-secondary);
+}
+
+.dash-discount-edit-body label:first-child {
+  margin-top: 0;
+}
+
+/* Legacy panel → dash look when inside trader-dashboard */
+.trader-dashboard .panel,
+.trader-dashboard .dash-panel .panel-title {
+  margin-bottom: 0;
+}
+
+.trader-dashboard .form-actions-top.dash-panel {
+  margin-bottom: 0;
+}
+
+.trader-dashboard .wf-section-title,
+.trader-dashboard .panel-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--primary-green-dark);
+}
+
+.trader-dashboard .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.trader-dashboard .data-table thead {
+  background: rgba(31, 122, 77, 0.08);
+}
+
+.trader-dashboard .data-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary-green-dark);
+  border-bottom: 1px solid #d1d5db;
+}
+
+.trader-dashboard .data-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.trader-dashboard .data-table tbody tr:hover {
+  background: rgba(31, 122, 77, 0.04);
+}
+
+@media (max-width: 640px) {
+  .dash-header {
+    padding: 18px;
+  }
+
+  .dash-header-actions {
+    width: 100%;
+  }
+
+  .dash-header-actions .btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .dash-table th,
+  .dash-table td,
+  .trader-dashboard .data-table th,
+  .trader-dashboard .data-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
 }

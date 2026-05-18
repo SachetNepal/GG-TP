@@ -18,7 +18,7 @@
                         <p>Shop local stores and collect your orders.</p>
                     </a>
 
-                    <a class="auth-choice-card auth-choice-card--orange" href="{{ route('register', ['type' => 'trader']) }}">
+                    <a class="auth-choice-card auth-choice-card--orange" href="{{ url('trader-portal/register.php') }}">
                         <h2>Register as Trader</h2>
                         <p>List your products and manage your shop.</p>
                     </a>

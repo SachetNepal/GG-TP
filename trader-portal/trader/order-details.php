@@ -44,34 +44,86 @@ $items = db_fetch_all(
 
 $pageTitle = 'Order #' . $oid;
 $traderLayout = true;
+$traderPageTitle = 'Order #' . $oid;
+$traderPageEyebrow = 'Order details';
+$traderPageSubtitle = $order ? trim((string) ($order['first_name'] ?? '') . ' ' . (string) ($order['last_name'] ?? '')) : '';
+$traderPageActionsHtml = '<a class="btn btn-outline" href="' . h(portal_url('trader/orders.php')) . '">← All orders</a>';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>
-    <section class="panel">
-        <p class="muted"><a href="<?= h(portal_url('trader/orders.php')) ?>">← Back to orders</a></p>
-        <h1 class="panel-title">Order #<?= h($oid) ?></h1>
+    <div class="trader-dashboard">
+        <?php require dirname(__DIR__) . '/includes/partials/trader-page-header.php'; ?>
+
         <?php if ($order): ?>
-            <p><strong>Customer:</strong> <?= h(trim((string) ($order['first_name'] ?? '') . ' ' . (string) ($order['last_name'] ?? ''))) ?></p>
-            <p><strong>Email:</strong> <?= h((string) ($order['email'] ?? '')) ?></p>
-            <p><strong>Phone:</strong> <?= h((string) ($order['phone_num'] ?? '')) ?></p>
-            <p><strong>Total:</strong> £<?= number_format((float) ($order['amount'] ?? 0), 2) ?></p>
-            <p><strong>Status:</strong> <?= h((string) ($order['status'] ?? '')) ?></p>
-            <p><strong>Payment:</strong> <?= h((string) ($order['payment_status'] ?? '')) ?> · £<?= number_format((float) ($order['paid_amount'] ?? 0), 2) ?></p>
+            <?php $cur = strtolower((string) ($order['status'] ?? 'pending')); ?>
+            <section class="dash-panel">
+                <div class="dash-detail-grid">
+                    <div class="dash-detail-item">
+                        <span class="label">Customer</span>
+                        <span class="value"><?= h(trim((string) ($order['first_name'] ?? '') . ' ' . (string) ($order['last_name'] ?? ''))) ?></span>
+                    </div>
+                    <div class="dash-detail-item">
+                        <span class="label">Email</span>
+                        <span class="value"><?= h((string) ($order['email'] ?? '')) ?></span>
+                    </div>
+                    <div class="dash-detail-item">
+                        <span class="label">Phone</span>
+                        <span class="value"><?= h((string) ($order['phone_num'] ?? '')) ?></span>
+                    </div>
+                    <div class="dash-detail-item">
+                        <span class="label">Order total</span>
+                        <span class="value">$<?= number_format((float) ($order['amount'] ?? 0), 2) ?></span>
+                    </div>
+                    <div class="dash-detail-item">
+                        <span class="label">Status</span>
+                        <span class="value"><span class="status-pill <?= h(trader_status_pill_class($cur)) ?>"><?= h(ucfirst($cur)) ?></span></span>
+                    </div>
+                    <div class="dash-detail-item">
+                        <span class="label">Payment</span>
+                        <span class="value"><?= h((string) ($order['payment_status'] ?? '—')) ?> · $<?= number_format((float) ($order['paid_amount'] ?? 0), 2) ?></span>
+                    </div>
+                </div>
+
+                <form id="orderStatusForm" method="post" class="dash-filters cols-2" style="max-width:480px;"
+                      data-update-url="<?= h(portal_url('api/update-order-status.php')) ?>">
+                    <?= portal_csrf_field() ?>
+                    <input type="hidden" name="order_id" value="<?= h($oid) ?>">
+                    <div>
+                        <label for="status">Update status</label>
+                        <select class="input" id="status" name="status">
+                            <?php foreach (['pending', 'placed', 'processing', 'ready', 'completed', 'cancelled'] as $st): ?>
+                                <option value="<?= h($st) ?>" <?= $cur === $st ? 'selected' : '' ?>><?= h(ucfirst($st)) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary" id="orderStatusBtn">Save status</button>
+                    </div>
+                </form>
+            </section>
         <?php endif; ?>
 
-        <h2 class="panel-title" style="margin-top:24px;">Your line items</h2>
-        <table class="data-table">
-            <thead>
-                <tr><th>Product</th><th>Qty</th><th>Line total</th></tr>
-            </thead>
-            <tbody>
-                <?php foreach ($items as $it): ?>
-                    <tr>
-                        <td><?= h((string) ($it['product_name'] ?? '')) ?></td>
-                        <td><?= (int) ($it['quantity'] ?? 0) ?></td>
-                        <td>£<?= number_format((float) ($it['price'] ?? 0) * (int) ($it['quantity'] ?? 0), 2) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </section>
+        <section class="dash-panel">
+            <h2 class="wf-section-title">Line items (your shop)</h2>
+            <div class="table-scroll">
+                <table class="dash-table">
+                    <thead>
+                        <tr><th>Product</th><th>Qty</th><th class="text-right">Line total</th></tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!$items): ?>
+                            <tr><td colspan="3" class="dash-empty">No line items.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($items as $it): ?>
+                                <tr>
+                                    <td><strong><?= h((string) ($it['product_name'] ?? '')) ?></strong></td>
+                                    <td><?= (int) ($it['quantity'] ?? 0) ?></td>
+                                    <td class="text-right">$<?= number_format((float) ($it['price'] ?? 0) * (int) ($it['quantity'] ?? 0), 2) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

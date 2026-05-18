@@ -24,7 +24,7 @@ class EnsureEmailVerificationSchemaCommand extends Command
         $this->addColumnIfMissing($conn, 'VERIFICATION', 'STATUS', 'VARCHAR2(20)');
 
         $this->info('Email verification schema is ready.');
-        $this->comment('Run database/sql/oracle-email-verification.sql once to verify existing accounts if needed.');
+        $this->comment('Existing users are marked verified when you run: php scripts/apply-oracle-updates.php --skip-prices');
 
         return self::SUCCESS;
     }

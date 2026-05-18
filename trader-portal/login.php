@@ -10,6 +10,7 @@ if (auth_user()) {
 }
 
 $error = '';
+$flash = flash_get();
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if (!portal_verify_csrf()) {
@@ -27,7 +28,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 error_log('login_trader: ' . $e->getMessage());
                 $ok = false;
             }
-            if (!empty($ok)) {
+            if ($ok === 'unverified') {
+                portal_redirect('/verify-email.php?email=' . rawurlencode($email));
+            }
+            if ($ok === true) {
                 portal_redirect('/trader/dashboard.php');
             }
             if ($error === '') {
@@ -44,8 +48,11 @@ require_once __DIR__ . '/includes/header.php';
       <article class="card auth-card">
         <header class="auth-header">
           <h1>Trader sign in</h1>
-          <p class="text-secondary">Demo: james.taylor@email.com / trader123 (Cleckheaton Butchers)</p>
+          <p class="text-secondary">Sign in to manage your shop, products, and orders.</p>
         </header>
+        <?php if ($flash): ?>
+            <div class="alert" style="background:#ecfdf5;color:#166534;padding:12px;border-radius:8px;margin-bottom:12px;"><?= h((string) $flash['message']) ?></div>
+        <?php endif; ?>
         <?php if ($error !== ''): ?>
             <div class="alert alert-error"><?= h($error) ?></div>
         <?php endif; ?>
@@ -61,6 +68,9 @@ require_once __DIR__ . '/includes/header.php';
             </div>
             <button type="submit" class="btn btn-primary auth-submit">Continue</button>
         </form>
+        <p style="margin-top:12px;text-align:center;font-size:14px;">
+            <a href="<?= h(portal_url('forgot-password.php')) ?>">Forgot password?</a>
+        </p>
         <div class="auth-divider"><span>New trader?</span></div>
         <a href="<?= h(portal_url('register.php')) ?>" class="btn auth-secondary-btn">Create trader account</a>
       </article>

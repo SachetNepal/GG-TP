@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\User;
 use App\Services\Basket\BasketService;
 use App\Support\OracleId;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutService
@@ -55,12 +56,28 @@ class CheckoutService
             $slotId = OracleId::next('COLLECTION_SLOT', 'slot_id', 'CS');
             $pickupDateSql = $pickupDate->format('Y-m-d');
 
-            DB::connection('oracle')->table('COLLECTION_SLOT')->insert([
+            $slotRow = [
                 'slot_id' => $slotId,
                 'date_' => DB::raw("TO_DATE('{$pickupDateSql}', 'YYYY-MM-DD')"),
                 'time_' => $payload['slot_time'],
                 'order_id' => $order->order_id,
-            ]);
+            ];
+
+            $pickupLocation = trim((string) ($payload['location'] ?? ''));
+            if ($pickupLocation !== '') {
+                $slotRow['pickup_location'] = $pickupLocation;
+            }
+
+            try {
+                DB::connection('oracle')->table('COLLECTION_SLOT')->insert($slotRow);
+            } catch (QueryException $e) {
+                if (isset($slotRow['pickup_location'])) {
+                    unset($slotRow['pickup_location']);
+                    DB::connection('oracle')->table('COLLECTION_SLOT')->insert($slotRow);
+                } else {
+                    throw $e;
+                }
+            }
 
             $slot = CollectionSlot::query()->findOrFail($slotId);
 

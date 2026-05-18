@@ -13,7 +13,7 @@
             <h3>Traders</h3>
             <ul class="footer-links">
                 <li><a href="{{ route('shops.index') }}">Browse local shops</a></li>
-                <li><a href="{{ url('/GG-TP/trader-portal/register.php') }}">Become a trader</a></li>
+                <li><a href="{{ url('trader-portal/register.php') }}">Become a trader</a></li>
                 <li><a href="{{ route('categories') }}">Shop categories</a></li>
             </ul>
         </div>

@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 $me = $me ?? auth_user();
 $isTrader = $me && ($me['trader_id'] ?? '') !== '';
+$brandUrl = $isTrader ? portal_url('trader/dashboard.php') : app_url();
+
+$authNavActive = $authNavActive ?? basename($_SERVER['PHP_SELF'] ?? '');
+$onRegisterPage = $authNavActive === 'register.php';
+$loginNavClass = $onRegisterPage ? 'btn btn-outline nav-login' : 'btn btn-signup nav-login';
+$registerNavClass = $onRegisterPage ? 'btn btn-signup nav-login' : 'btn btn-outline nav-login';
 
 ?>
 <header class="site-header">
     <input type="checkbox" id="site-nav-toggle" class="site-nav-checkbox">
     <div class="container navbar-wrap">
-        <a href="<?= h(app_url()) ?>" class="brand" aria-label="GroceryGo home">
+        <a href="<?= h($brandUrl) ?>" class="brand" aria-label="<?= $isTrader ? 'Trader dashboard' : 'GroceryGo home' ?>">
             <img src="<?= h(app_url('assets/logo/GroceryGo-main.png')) ?>" alt="GroceryGo" class="brand-logo">
         </a>
 
@@ -20,24 +26,25 @@ $isTrader = $me && ($me['trader_id'] ?? '') !== '';
         </label>
 
         <nav class="main-nav" aria-label="Primary">
-            <div class="nav-primary">
-                <a href="<?= h(app_url()) ?>">Home</a>
-                <a href="<?= h(app_url('shops')) ?>">Shops</a>
-                <a href="<?= h(app_url('categories')) ?>">Categories</a>
-                <a href="<?= h(app_url('about')) ?>">About Us</a>
-            </div>
-            <div class="nav-actions">
-                <?php if ($isTrader): ?>
-                    <a href="<?= h(portal_url('trader/dashboard.php')) ?>" class="nav-baskets">Dashboard</a>
-                    <a href="<?= h(portal_url('trader/manage-products.php')) ?>" class="nav-baskets">Products</a>
-                    <a href="<?= h(portal_url('trader/orders.php')) ?>" class="nav-baskets">Orders</a>
-                    <a href="<?= h(portal_url('trader/profile.php')) ?>" class="nav-baskets">Profile</a>
+            <?php if ($isTrader): ?>
+                <div class="nav-primary nav-primary--trader">
+                    <a href="<?= h(portal_url('trader/dashboard.php')) ?>">Dashboard</a>
+                    <a href="<?= h(portal_url('trader/manage-products.php')) ?>">Products</a>
+                    <a href="<?= h(portal_url('trader/discounts.php')) ?>">Discounts</a>
+                    <a href="<?= h(portal_url('trader/orders.php')) ?>">Orders</a>
+                    <a href="<?= h(portal_url('trader/reports.php')) ?>">Reports</a>
+                    <a href="<?= h(portal_url('trader/profile.php')) ?>">Profile</a>
+                </div>
+                <div class="nav-actions">
                     <a href="<?= h(portal_url('logout.php')) ?>" class="btn btn-signup nav-login">Logout</a>
-                <?php else: ?>
-                    <a href="<?= h(app_url('cart')) ?>" class="nav-baskets">Baskets</a>
-                    <a href="<?= h(portal_url('login.php')) ?>" class="btn btn-signup nav-login">Login</a>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php else: ?>
+                <div class="nav-actions nav-actions--auth">
+                    <a href="<?= h(app_url()) ?>" class="nav-home-link">Home</a>
+                    <a href="<?= h(portal_url('login.php')) ?>" class="<?= h($loginNavClass) ?>"<?= $onRegisterPage ? '' : ' aria-current="page"' ?>>Login</a>
+                    <a href="<?= h(portal_url('register.php')) ?>" class="<?= h($registerNavClass) ?>"<?= $onRegisterPage ? ' aria-current="page"' : '' ?>>Register</a>
+                </div>
+            <?php endif; ?>
         </nav>
     </div>
 </header>

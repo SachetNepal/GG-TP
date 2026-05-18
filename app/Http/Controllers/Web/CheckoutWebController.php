@@ -46,10 +46,7 @@ class CheckoutWebController extends Controller
             'paypalCurrency' => $this->payPalService->currency(),
             'paypalSdkUrl' => $this->payPalService->sdkScriptBaseUrl(),
             'paypalConfigured' => $this->payPalService->isConfigured(),
-            'paypalSandboxTestAmount' => config('paypal.sandbox_test_amount'),
-            'paypalSandbox' => $this->payPalService->isSandbox(),
             'paypalChargeAmount' => $this->payPalService->chargeAmount((float) $summary['total']),
-            'paypalUseRedirect' => $this->payPalService->isSandbox(),
         ]);
     }
 
