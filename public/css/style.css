@@ -1034,14 +1034,50 @@ a.trader-card h3 {
   font-weight: 600;
 }
 
+.cart-qty-form--main {
+  display: inline-flex;
+  margin: 0;
+}
+
 .cart-qty-controls {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .cart-qty-form {
   display: inline-flex;
+  margin: 0;
+}
+
+.cart-remove-form {
+  margin: 6px 0 0;
+}
+
+.cart-remove-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cart-remove-btn:hover {
+  color: #991b1b;
+}
+
+.cart-qty-input {
+  width: 64px;
+  -moz-appearance: textfield;
+}
+
+.cart-qty-input::-webkit-outer-spin-button,
+.cart-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
   margin: 0;
 }
 

@@ -101,7 +101,6 @@
                             <form method="post" action="{{ route('products.reviews.store', $product->product_id) }}" class="card review-form">
                                 @csrf
                                 <p class="review-form-label">Write a review</p>
-                                <p class="review-note">You can post multiple reviews after you have purchased this product.</p>
                                 <div class="star-rating" role="radiogroup" aria-label="Your rating">
                                     @for ($i = 5; $i >= 1; $i--)
                                         <input
@@ -127,8 +126,8 @@
                                 @endif
 
                                 <div class="form-field">
-                                    <label for="review_body">Your review</label>
-                                    <textarea id="review_body" name="review_body" rows="4" maxlength="1000" required placeholder="Share your experience with this product…">{{ old('review_body') }}</textarea>
+                                    <label for="review_body">Your review <span class="text-secondary">(optional)</span></label>
+                                    <textarea id="review_body" name="review_body" rows="4" maxlength="1000" placeholder="Share your experience with this product…">{{ old('review_body') }}</textarea>
                                 </div>
                                 @error('review_body')
                                     <p class="alert alert-error" style="margin-top:8px;">{{ $message }}</p>
@@ -153,7 +152,9 @@
                                         <strong>{{ trim(($review->customer->user->first_name ?? '').' '.($review->customer->user->last_name ?? '')) ?: 'Customer' }}</strong>
                                         <span class="stars-gold" aria-label="{{ $review->rating }} out of 5">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</span>
                                     </div>
-                                    <p class="review-body-text">{{ $review->review_body }}</p>
+                                    @if (filled($review->review_body))
+                                        <p class="review-body-text">{{ $review->review_body }}</p>
+                                    @endif
                                     @if ($review->review_date)
                                         <time class="review-date text-secondary" datetime="{{ $review->review_date->toDateString() }}">{{ $review->review_date->format('j M Y') }}</time>
                                     @endif

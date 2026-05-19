@@ -52,6 +52,7 @@ Route::redirect('/traders', '/shops');
 Route::get('/cart', [CartWebController::class, 'index'])->name('cart');
 Route::post('/cart/items', [CartWebController::class, 'addItem'])->name('cart.add');
 Route::post('/cart/items/update', [CartWebController::class, 'updateItem'])->name('cart.update');
+Route::post('/cart/items/remove', [CartWebController::class, 'removeItem'])->name('cart.remove');
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/checkout/collection-slot', [CheckoutWebController::class, 'showSlotPicker'])->name('checkout.collection-slot');
