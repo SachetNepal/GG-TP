@@ -39,22 +39,44 @@
 
             </div>
 
-            <article class="product-details-panel">
+            <article class="card product-details-panel">
                 @php
                     $stock = (int) ($product->product_in_stock ?? 0);
-                    $stockLabel = $stock <= 0 ? 'Out of Stock' : ($stock <= 5 ? 'Low Stock' : 'In Stock');
                     $stockVariant = $stock <= 0 ? 'out' : ($stock <= 5 ? 'low' : 'in');
+                    [$stockLabel, $stockDetail] = match ($stockVariant) {
+                        'out' => ['Out of stock', null],
+                        'low' => ['Low stock', $stock . ' left'],
+                        default => ['Stock available', $stock . ' in stock'],
+                    };
+                    $shop = $product->shop;
+                    $shopName = $shop->shop_name ?? 'Local shop';
+                    $shopUrl = $shop?->shop_id
+                        ? route('categories', ['shop_id' => [$shop->shop_id]])
+                        : route('shops.index');
                 @endphp
 
-                <div class="product-shop">
-                    <span class="product-meta-pill">Trader: {{ $product->shop->shop_name ?? 'Shop' }}</span>
+                <div class="product-overview-strip">
+                    <a href="{{ $shopUrl }}" class="product-seller-link">
+                        <span class="product-seller-copy">
+                            <span class="product-seller-label">Sold by</span>
+                            <span class="product-seller-name">{{ $shopName }}</span>
+                        </span>
+                    </a>
+                    <div class="product-stock-status product-stock-status--{{ $stockVariant }}" role="status">
+                        <span class="product-stock-status-label">{{ $stockLabel }}</span>
+                        @if ($stockDetail)
+                            <span class="product-stock-status-detail">{{ $stockDetail }}</span>
+                        @endif
+                    </div>
                 </div>
 
                 <h2 class="product-details-name">{{ $product->product_name }}</h2>
 
                 <div class="product-details-price-row">
                     <div class="product-price-large">{{ \App\Support\Money::format((float) $product->price) }}</div>
-                    @include('partials.status-badge', ['label' => $stockLabel, 'variant' => $stockVariant])
+                    @if ($product->category?->category_name)
+                        <span class="product-category-tag">{{ $product->category->category_name }}</span>
+                    @endif
                 </div>
 
                 @if ($product->reviews->isNotEmpty())
@@ -85,7 +107,7 @@
                         <label for="quantity">Quantity</label>
                         <input id="quantity" class="qty-input" type="number" name="quantity" value="1" min="1" max="20">
                     </div>
-                    <button type="submit" class="btn btn-primary product-add-btn">Add to Basket</button>
+                    <button type="submit" class="btn btn-primary product-add-btn" @disabled($stock <= 0)>Add to Basket</button>
                 </form>
                 @guest
                     <p class="text-secondary" style="margin-top:10px;font-size:14px;">
